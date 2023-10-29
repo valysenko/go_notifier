@@ -13,6 +13,7 @@ import (
 type AppConfig struct {
 	AppEnv string `env:"APP_ENV" env-default:"loc"`
 	DBConfig
+	HttpServerConfig
 }
 
 type DBConfig struct {
@@ -25,6 +26,10 @@ type DBConfig struct {
 	MaxIdleConns    int    `env:"DB_MAX_IDLE_CONNS"`
 	ConnMaxLifetime time.Duration
 	ConnMaxIdleTime time.Duration
+}
+
+type HttpServerConfig struct {
+	ServerPort string `env:"HTTP_PORT"`
 }
 
 func (cfg *DBConfig) ProvideDSN() string {

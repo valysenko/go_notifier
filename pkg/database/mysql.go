@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"go_notifier/configs"
 
 	"github.com/pressly/goose"
@@ -13,7 +12,6 @@ type DB struct {
 }
 
 func InitDB(dbConfig *configs.DBConfig) *DB {
-	fmt.Println(dbConfig.ProvideDSN())
 	db, err := sql.Open("mysql", dbConfig.ProvideDSN())
 	if err != nil {
 		panic(err)

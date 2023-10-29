@@ -1,29 +1,34 @@
 package main
 
 import (
-	"fmt"
 	"go_notifier/configs"
 	"go_notifier/pkg/database"
-	"time"
+	server "go_notifier/pkg/http"
+	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
 	appConfig := configs.InitConfig()
+
+	// mysql
 	db := database.InitDB(&appConfig.DBConfig)
 	defer db.Mysql.Close()
 
 	err := db.Mysql.Ping()
 	if err != nil {
-		fmt.Println("poanic 1")
+		log.Println("db connection panic")
 		panic(err)
-	}
-	if err == nil {
-		fmt.Println("no panic 1")
+	} else {
+		log.Println("db connection ok")
 	}
 
 	db.RunMigrations()
 
-	time.Sleep(time.Minute * 20)
+	// http server
+	httpServer := server.InitServer(&appConfig.HttpServerConfig)
+	if err := httpServer.Start(); err != nil {
+		panic(err)
+	}
 }
