@@ -23,5 +23,7 @@ func main() {
 		fmt.Println("no panic 1")
 	}
 
+	db.RunMigrations()
+
 	time.Sleep(time.Minute * 20)
 }
