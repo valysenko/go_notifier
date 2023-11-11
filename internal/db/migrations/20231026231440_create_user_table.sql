@@ -6,7 +6,9 @@ CREATE TABLE user (
     email VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     timezone VARCHAR(255),
-    is_active BOOLEAN DEFAULT true
+    is_active BOOLEAN DEFAULT true,
+    UNIQUE (uuid),
+    UNIQUE (email)
 );
 -- +goose StatementEnd
 

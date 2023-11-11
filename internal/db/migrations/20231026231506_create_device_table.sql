@@ -5,7 +5,8 @@ CREATE TABLE device (
     token VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id INT,
-    FOREIGN KEY (user_id) REFERENCES user(id)
+    FOREIGN KEY (user_id) REFERENCES user(id),
+    UNIQUE (token)
 );
 -- +goose StatementEnd
 

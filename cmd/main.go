@@ -9,6 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// go run cmd/main.go
 func main() {
 	appConfig := configs.InitConfig()
 
