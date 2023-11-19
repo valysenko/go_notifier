@@ -1,16 +1,16 @@
-package device
+package handlers
 
 import (
 	"bytes"
 	"encoding/json"
 	"go_notifier/internal/dto"
-	"go_notifier/internal/service/device"
+	"go_notifier/internal/service"
 	"io"
 	"net/http"
 )
 
-type ResponseData struct {
-	ID int64 `json:"id"`
+type CreateDeviceResponse struct {
+	Token string `json:"token"`
 }
 
 func CreateDeviceHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,14 +38,14 @@ func CreateDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// run business logic
-	deviceId, err := device.CreateDevice(&dto)
+	_, err = service.CreateDevice(&dto)
 	if err != nil {
 		http.Error(w, "error while device creation", http.StatusInternalServerError)
 		return
 	}
 
 	// response
-	responseData := ResponseData{ID: deviceId}
+	responseData := CreateDeviceResponse{Token: dto.Token}
 	jsonResponse, err := json.Marshal(responseData)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

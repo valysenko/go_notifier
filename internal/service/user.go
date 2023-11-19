@@ -1,4 +1,4 @@
-package user
+package service
 
 import (
 	"go_notifier/internal/dto"

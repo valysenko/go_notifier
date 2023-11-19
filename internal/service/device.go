@@ -1,4 +1,4 @@
-package device
+package service
 
 import (
 	"go_notifier/internal/db/repository"

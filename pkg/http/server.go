@@ -2,8 +2,7 @@ package server
 
 import (
 	"go_notifier/configs"
-	"go_notifier/internal/http/handlers/device"
-	"go_notifier/internal/http/handlers/user"
+	"go_notifier/internal/http/handlers"
 	"log"
 	"net/http"
 
@@ -34,10 +33,18 @@ func (s *HttpServer) initializeRoutes() {
 	})
 
 	s.router.Route("/user", func(r chi.Router) {
-		r.Post("/", user.CreateUserHandler)
+		r.Post("/", handlers.CreateUserHandler)
 	})
 
 	s.router.Route("/device", func(r chi.Router) {
-		r.Post("/", device.CreateDeviceHandler)
+		r.Post("/", handlers.CreateDeviceHandler)
+	})
+
+	s.router.Route("/campaign", func(r chi.Router) {
+		r.Post("/", handlers.CreateCampaignHandler)
+	})
+
+	s.router.Route("/user-campaign", func(r chi.Router) {
+		r.Post("/", handlers.CreateUserCampaignHandler)
 	})
 }

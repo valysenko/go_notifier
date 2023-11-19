@@ -7,7 +7,8 @@ CREATE TABLE campaign (
     message VARCHAR(255) NOT NULL,
     is_active BOOLEAN DEFAULT true,
     time TIME,
-    days_of_week SET("1", "2", "3", "4", "5", "6", "7")
+    days_of_week SET("1", "2", "3", "4", "5", "6", "7"),
+    UNIQUE (uuid)
 );
 -- +goose StatementEnd
 
