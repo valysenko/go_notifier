@@ -1,11 +1,10 @@
 package handlers
 
 import (
-	"bytes"
 	"encoding/json"
 	"go_notifier/internal/dto"
+	"go_notifier/internal/http/helpers"
 	"go_notifier/internal/service"
-	"io"
 	"net/http"
 )
 
@@ -15,25 +14,10 @@ type CreateUserResponse struct {
 
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	// request
-	var buf bytes.Buffer
-	_, err := io.Copy(&buf, r.Body)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	requestData := buf.Bytes()
-	r.Body.Close()
-
 	var dto dto.User
-	if err := json.Unmarshal(requestData, &dto); err != nil {
-		http.Error(w, "ivalid json unmarshal", http.StatusInternalServerError)
-		return
-	}
-
-	err = dto.Validate()
+	err := helpers.CreateAndValidateFromRequest(r, &dto)
 	if err != nil {
-		http.Error(w, "not valid", http.StatusBadRequest)
+		helpers.HandleRequestError(err, w)
 		return
 	}
 
