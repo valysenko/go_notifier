@@ -1,6 +1,7 @@
 package service
 
 import (
+	"go_notifier/internal/db/repository/mocks"
 	"go_notifier/internal/dto"
 	"go_notifier/pkg/database"
 	"testing"
@@ -13,6 +14,9 @@ func TestCreateDevice(t *testing.T) {
 	db, mock := database.InitMockDB(t)
 	defer db.Close()
 
+	mockUserRepo := mocks.NewUserRepository(t)
+	SetUserRepository(mockUserRepo)
+
 	dto := &dto.Device{
 		Token:    "token",
 		UserUUID: "uuid",
@@ -20,8 +24,7 @@ func TestCreateDevice(t *testing.T) {
 
 	t.Run("create device success", func(t *testing.T) {
 		var expectedId int64 = 4
-		// not OK to mock inner's function call - better to have an repo interface to moch a whole function
-		mock.ExpectQuery("SELECT id FROM user WHERE uuid = ?").WithArgs(dto.UserUUID).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(expectedId))
+		mockUserRepo.On("GetUserIDByUUID", dto.UserUUID).Once().Return(expectedId, nil)
 		mock.ExpectPrepare("INSERT INTO device").
 			ExpectExec().
 			WithArgs(dto.Token, expectedId).

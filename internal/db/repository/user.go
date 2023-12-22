@@ -11,7 +11,16 @@ type UserIdTimezone struct {
 	Timezone string
 }
 
-func GetUserIDByUUID(uuid string) (int64, error) {
+//go:generate go run github.com/vektra/mockery/v2@v2.20.0 --name=UserRepository --case snake
+type UserRepository interface {
+	GetUserIDByUUID(uuid string) (int64, error)
+	GetUserIDAndTimezoneByUUID(uuid string) (*UserIdTimezone, error)
+}
+
+type UserRepositoryImpl struct {
+}
+
+func (repo *UserRepositoryImpl) GetUserIDByUUID(uuid string) (int64, error) {
 	var userID int64
 	query := "SELECT id FROM user WHERE uuid = ?"
 
@@ -27,7 +36,7 @@ func GetUserIDByUUID(uuid string) (int64, error) {
 	return userID, nil
 }
 
-func GetUserIDAndTimezoneByUUID(uuid string) (*UserIdTimezone, error) {
+func (repo *UserRepositoryImpl) GetUserIDAndTimezoneByUUID(uuid string) (*UserIdTimezone, error) {
 	var user UserIdTimezone
 	query := "SELECT id, timezone FROM user WHERE uuid = ?"
 

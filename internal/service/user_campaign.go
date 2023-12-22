@@ -8,13 +8,29 @@ import (
 	"time"
 )
 
+var userRepository repository.UserRepository
+var campaignRepository repository.CampaignRepository
+
+func SetCampaignRepository(repo repository.CampaignRepository) {
+	campaignRepository = repo
+}
+
+func SetUserRepository(repo repository.UserRepository) {
+	userRepository = repo
+}
+
+func init() {
+	campaignRepository = &repository.CampaignRepositoryImpl{}
+	userRepository = &repository.UserRepositoryImpl{}
+}
+
 func CreateUserCampaign(dto *dto.CampaignUser) (string, error) {
-	user, err := repository.GetUserIDAndTimezoneByUUID(dto.UserUUID)
+	user, err := userRepository.GetUserIDAndTimezoneByUUID(dto.UserUUID)
 	if err != nil {
 		return "", err
 	}
 
-	campaign, err := repository.GetCampgignIdAndTimeByUUID(dto.CampaignUUID)
+	campaign, err := campaignRepository.GetCampgignIdAndTimeByUUID(dto.CampaignUUID)
 	if err != nil {
 		return "", err
 	}
@@ -58,10 +74,10 @@ func calculateUserCampaignTime(campaignTime, userTimezone string) (string, error
 
 	currentTime := time.Now().In(userLocation)
 	userDateTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(),
-		desiredTimeObj.Hour(), desiredTimeObj.Minute(), 0, 0, userLocation)
+		desiredTimeObj.Hour(), desiredTimeObj.Minute(), desiredTimeObj.Second(), 0, userLocation)
 
 	userDateTimeUTC := userDateTime.UTC()
-	userCampaignTime := userDateTimeUTC.Format("15:04")
+	userCampaignTime := userDateTimeUTC.Format("15:04:05")
 
 	fmt.Println("Desired Time in User's Timezone:", userDateTime.Format("2006-01-02 15:04"))
 	fmt.Println("Desired Time in UTC:", userDateTimeUTC.Format("2006-01-02 15:04 MST"))

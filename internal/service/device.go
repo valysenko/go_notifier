@@ -1,13 +1,12 @@
 package service
 
 import (
-	"go_notifier/internal/db/repository"
 	"go_notifier/internal/dto"
 	"go_notifier/pkg/database"
 )
 
 func CreateDevice(dto *dto.Device) (int64, error) {
-	userId, err := repository.GetUserIDByUUID(dto.UserUUID)
+	userId, err := userRepository.GetUserIDByUUID(dto.UserUUID)
 	if err != nil {
 		return 0, err
 	}
