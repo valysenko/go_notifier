@@ -11,15 +11,10 @@ type CampaignIdTime struct {
 	Time string
 }
 
-//go:generate go run github.com/vektra/mockery/v2@v2.20.0 --name=CampaignRepository --case snake
-type CampaignRepository interface {
-	GetCampgignIdAndTimeByUUID(uuid string) (*CampaignIdTime, error)
+type MysqlCampaignRepository struct {
 }
 
-type CampaignRepositoryImpl struct {
-}
-
-func (repo *CampaignRepositoryImpl) GetCampgignIdAndTimeByUUID(uuid string) (*CampaignIdTime, error) {
+func (repo *MysqlCampaignRepository) GetCampgignIdAndTimeByUUID(uuid string) (*CampaignIdTime, error) {
 	var campaign CampaignIdTime
 	query := "SELECT id, time FROM campaign WHERE uuid = ?"
 

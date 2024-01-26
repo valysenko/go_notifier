@@ -2,8 +2,8 @@ package service
 
 import (
 	"go_notifier/internal/db/repository"
-	"go_notifier/internal/db/repository/mocks"
 	"go_notifier/internal/dto"
+	"go_notifier/internal/service/mocks"
 	"go_notifier/pkg/database"
 	"testing"
 

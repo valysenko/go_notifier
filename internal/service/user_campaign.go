@@ -8,20 +8,33 @@ import (
 	"time"
 )
 
-var userRepository repository.UserRepository
-var campaignRepository repository.CampaignRepository
+// https://go.dev/wiki/CodeReviewComments#interfaces
+//
+//go:generate go run github.com/vektra/mockery/v2@v2.20.0 --name=UserRepository --case snake
+type UserRepository interface {
+	GetUserIDByUUID(uuid string) (int64, error)
+	GetUserIDAndTimezoneByUUID(uuid string) (*repository.UserIdTimezone, error)
+}
 
-func SetCampaignRepository(repo repository.CampaignRepository) {
+//go:generate go run github.com/vektra/mockery/v2@v2.20.0 --name=CampaignRepository --case snake
+type CampaignRepository interface {
+	GetCampgignIdAndTimeByUUID(uuid string) (*repository.CampaignIdTime, error)
+}
+
+var userRepository UserRepository
+var campaignRepository CampaignRepository
+
+func SetCampaignRepository(repo CampaignRepository) {
 	campaignRepository = repo
 }
 
-func SetUserRepository(repo repository.UserRepository) {
+func SetUserRepository(repo UserRepository) {
 	userRepository = repo
 }
 
 func init() {
-	campaignRepository = &repository.CampaignRepositoryImpl{}
-	userRepository = &repository.UserRepositoryImpl{}
+	campaignRepository = &repository.MysqlCampaignRepository{}
+	userRepository = &repository.MysqlUserRepository{}
 }
 
 func CreateUserCampaign(dto *dto.CampaignUser) (string, error) {
