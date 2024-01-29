@@ -42,8 +42,29 @@ services:
     networks:
       - go-notifier-network
 
+  mysql-test:
+    image: mysql:8.1.0
+    command: --default-authentication-plugin=mysql_native_password
+    hostname: go-notifier-mysql-test
+    container_name: go-notifier-mysql-test
+    env_file:
+      - .env.test
+    environment:
+      MYSQL_ROOT_PASSWORD: root1
+      MYSQL_DATABASE: go_notifier
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: go_notifier
+    ports:
+      - "29306:3306"
+    volumes:
+      - go-notifier-mysql-test-data:/var/lib/mysql
+    restart: always
+    networks:
+      - go-notifier-network
+
 volumes:
-  go-notifier-mysql-data:
+  go-notifier-mysql-data: ~
+  go-notifier-mysql-test-data: ~
 
 networks:
   go-notifier-network:

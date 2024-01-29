@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/joho/godotenv"
 )
 
 type AppConfig struct {
@@ -44,7 +43,7 @@ func (cfg *DBConfig) ProvideDSN() string {
 
 func InitConfig() *AppConfig {
 	cfg := &AppConfig{}
-	godotenv.Load("deployments/.env") // TODO: figure out, if run go run cmd/main.go
+	// godotenv.Load("deployments/.env") // TODO: figure out, if run go run cmd/main.go
 	// godotenv.Load("../deployments/.env") // TODO: figure out, if run go run main.go
 
 	if err := cleanenv.ReadEnv(cfg); err != nil {

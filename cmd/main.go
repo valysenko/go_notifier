@@ -25,7 +25,7 @@ func main() {
 		log.Println("db connection ok")
 	}
 
-	db.RunMigrations()
+	db.RunMigrations("internal/db/migrations")
 
 	// http server
 	httpServer := server.InitServer(&appConfig.HttpServerConfig)

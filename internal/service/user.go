@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"go_notifier/internal/dto"
 	"go_notifier/pkg/database"
 )
@@ -18,5 +19,6 @@ func CreateUser(dto *dto.User) (int64, error) {
 	}
 
 	lastId, err := res.LastInsertId()
+	fmt.Println(err)
 	return lastId, err
 }

@@ -2,10 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"go_notifier/internal/dto"
 	"go_notifier/internal/http/helpers"
 	"go_notifier/internal/service"
 	"net/http"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 type CreateUserResponse struct {
@@ -24,6 +27,11 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	// run business logic
 	_, err = service.CreateUser(&dto)
 	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			http.Error(w, "user already exists", http.StatusBadRequest)
+			return
+		}
 		http.Error(w, "error while user creation", http.StatusInternalServerError)
 		return
 	}
