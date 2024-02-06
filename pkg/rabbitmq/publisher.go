@@ -16,7 +16,7 @@ func NewPublisher(conn *amqp.Connection) *Publisher {
 	}
 }
 
-func (e *Publisher) Push(queueName string, event string) error {
+func (e *Publisher) Push(queueName string, event []byte) error {
 	channel, err := e.connection.Channel()
 	if err != nil {
 		return err
@@ -43,13 +43,25 @@ func (e *Publisher) Push(queueName string, event string) error {
 		false,     // mandatory
 		false,     // immediate
 		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(event),
+			ContentType: "application/json",
+			Body:        event,
 		},
 	)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
 	fmt.Println("Sending message: %s -> %s", event, queueName)
+
 	return nil
+}
+
+// example events
+type OneEvent struct {
+	TicketID  int `json:"ticketId"`
+	CommentID int `json:"commentId"`
+}
+
+type TwoEvent struct {
+	AuthorId int `json:"authorId"`
 }
