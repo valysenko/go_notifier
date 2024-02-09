@@ -1,8 +1,8 @@
-package service
+package user
 
 import (
 	"errors"
-	"go_notifier/internal/dto"
+	"go_notifier/internal/common"
 	"go_notifier/pkg/database"
 	"testing"
 
@@ -15,7 +15,7 @@ func TestCreateUser(t *testing.T) {
 	defer db.Mysql.Close()
 	s := NewUserService(db)
 
-	dto := &dto.User{
+	dto := &common.UserRequest{
 		UUID:     "uuid",
 		Email:    "email",
 		Timezone: "Europe/Kyiv",

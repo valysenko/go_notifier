@@ -1,15 +1,15 @@
-package handlers
+package user_campaign
 
 import (
 	"encoding/json"
 	"fmt"
-	"go_notifier/internal/dto"
+	"go_notifier/internal/common"
 	"go_notifier/internal/http/helpers"
 	"net/http"
 )
 
-type UserCampaignService interface {
-	CreateUserCampaign(dto *dto.CampaignUser) (string, error)
+type UserCampaignServiceInterface interface {
+	CreateUserCampaign(request *common.CampaignUserRequest) (string, error)
 }
 
 type CreateUserCampaignResponse struct {
@@ -17,10 +17,10 @@ type CreateUserCampaignResponse struct {
 }
 
 type UserCampaignHandler struct {
-	service UserCampaignService
+	service UserCampaignServiceInterface
 }
 
-func NewUserCampaignHandler(s UserCampaignService) *UserCampaignHandler {
+func NewUserCampaignHandler(s UserCampaignServiceInterface) *UserCampaignHandler {
 	return &UserCampaignHandler{
 		service: s,
 	}
@@ -28,15 +28,15 @@ func NewUserCampaignHandler(s UserCampaignService) *UserCampaignHandler {
 
 func (h *UserCampaignHandler) CreateUserCampaign(w http.ResponseWriter, r *http.Request) {
 	// request
-	var dto dto.CampaignUser
-	err := helpers.CreateAndValidateFromRequest(r, &dto)
+	var request common.CampaignUserRequest
+	err := helpers.CreateAndValidateFromRequest(r, &request)
 	if err != nil {
 		helpers.HandleRequestError(err, w)
 		return
 	}
 
 	// run business logic
-	time, err := h.service.CreateUserCampaign(&dto)
+	time, err := h.service.CreateUserCampaign(&request)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "error while campaign-user creation", http.StatusInternalServerError)

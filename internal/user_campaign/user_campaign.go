@@ -1,9 +1,10 @@
-package service
+package user_campaign
 
 import (
 	"fmt"
-	"go_notifier/internal/db/repository"
-	"go_notifier/internal/dto"
+	"go_notifier/internal/campaign"
+	"go_notifier/internal/common"
+	"go_notifier/internal/user"
 	"go_notifier/pkg/database"
 	"time"
 )
@@ -12,13 +13,12 @@ import (
 
 //go:generate go run github.com/vektra/mockery/v2@v2.20.0 --name=UserRepository --case snake
 type UserRepository interface {
-	GetUserIDByUUID(uuid string) (int64, error)
-	GetUserIDAndTimezoneByUUID(uuid string) (*repository.UserIdTimezone, error)
+	GetUserIDAndTimezoneByUUID(uuid string) (*user.UserIdTimezone, error)
 }
 
 //go:generate go run github.com/vektra/mockery/v2@v2.20.0 --name=CampaignRepository --case snake
 type CampaignRepository interface {
-	GetCampgignIdAndTimeByUUID(uuid string) (*repository.CampaignIdTime, error)
+	GetCampgignIdAndTimeByUUID(uuid string) (*campaign.CampaignIdTime, error)
 }
 
 type UserCampaignService struct {
@@ -35,7 +35,7 @@ func NewUserCampaignService(db *database.AppDB, userRepo UserRepository, campaig
 	}
 }
 
-func (s *UserCampaignService) CreateUserCampaign(dto *dto.CampaignUser) (string, error) {
+func (s *UserCampaignService) CreateUserCampaign(dto *common.CampaignUserRequest) (string, error) {
 	user, err := s.userRepository.GetUserIDAndTimezoneByUUID(dto.UserUUID)
 	if err != nil {
 		return "", err

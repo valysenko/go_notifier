@@ -1,4 +1,4 @@
-package repository
+package campaign
 
 import (
 	"database/sql"

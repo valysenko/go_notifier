@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	repository "go_notifier/internal/db/repository"
+	campaign "go_notifier/internal/campaign"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -14,19 +14,19 @@ type CampaignRepository struct {
 }
 
 // GetCampgignIdAndTimeByUUID provides a mock function with given fields: uuid
-func (_m *CampaignRepository) GetCampgignIdAndTimeByUUID(uuid string) (*repository.CampaignIdTime, error) {
+func (_m *CampaignRepository) GetCampgignIdAndTimeByUUID(uuid string) (*campaign.CampaignIdTime, error) {
 	ret := _m.Called(uuid)
 
-	var r0 *repository.CampaignIdTime
+	var r0 *campaign.CampaignIdTime
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*repository.CampaignIdTime, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) (*campaign.CampaignIdTime, error)); ok {
 		return rf(uuid)
 	}
-	if rf, ok := ret.Get(0).(func(string) *repository.CampaignIdTime); ok {
+	if rf, ok := ret.Get(0).(func(string) *campaign.CampaignIdTime); ok {
 		r0 = rf(uuid)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*repository.CampaignIdTime)
+			r0 = ret.Get(0).(*campaign.CampaignIdTime)
 		}
 	}
 

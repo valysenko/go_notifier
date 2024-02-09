@@ -1,10 +1,11 @@
 package app
 
 import (
-	"go_notifier/internal/db/repository"
-	"go_notifier/internal/http/handlers"
+	"go_notifier/internal/campaign"
+	"go_notifier/internal/device"
 	"go_notifier/internal/http/server"
-	"go_notifier/internal/service"
+	"go_notifier/internal/user"
+	"go_notifier/internal/user_campaign"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -19,46 +20,46 @@ func NewLogger() log.FieldLogger {
 }
 
 // repository
-func NewUserRepository(app *ServerApp) *repository.MysqlUserRepository {
-	return repository.NewMysqlUserRepository(app.mysql)
+func NewUserRepository(app *ServerApp) *user.MysqlUserRepository {
+	return user.NewMysqlUserRepository(app.mysql)
 }
 
-func NewCampaignRepository(app *ServerApp) *repository.MysqlCampaignRepository {
-	return repository.NewMysqlCampaignRepository(app.mysql)
+func NewCampaignRepository(app *ServerApp) *campaign.MysqlCampaignRepository {
+	return campaign.NewMysqlCampaignRepository(app.mysql)
 }
 
 // service
-func NewDeviceService(app *ServerApp) *service.DeviceService {
-	return service.NewDeviceService(app.mysql, NewUserRepository(app))
+func NewDeviceService(app *ServerApp) *device.DeviceService {
+	return device.NewDeviceService(app.mysql, NewUserRepository(app))
 }
 
-func NewCampaignService(app *ServerApp) *service.CampaignService {
-	return service.NewCampaignService(app.mysql)
+func NewCampaignService(app *ServerApp) *campaign.CampaignService {
+	return campaign.NewCampaignService(app.mysql)
 }
 
-func NewUserService(app *ServerApp) *service.UserService {
-	return service.NewUserService(app.mysql)
+func NewUserService(app *ServerApp) *user.UserService {
+	return user.NewUserService(app.mysql)
 }
 
-func NewUserCampaignService(app *ServerApp) *service.UserCampaignService {
-	return service.NewUserCampaignService(app.mysql, NewUserRepository(app), NewCampaignRepository(app))
+func NewUserCampaignService(app *ServerApp) *user_campaign.UserCampaignService {
+	return user_campaign.NewUserCampaignService(app.mysql, NewUserRepository(app), NewCampaignRepository(app))
 }
 
 // http handler
-func NewDeviceHandler(app *ServerApp) *handlers.DeviceHandler {
-	return handlers.NewDeviceHandler(NewDeviceService(app))
+func NewDeviceHandler(app *ServerApp) *device.DeviceHandler {
+	return device.NewDeviceHandler(NewDeviceService(app))
 }
 
-func NewCampaignHandler(app *ServerApp) *handlers.CampaignHandler {
-	return handlers.NewCampaignHandler(NewCampaignService(app))
+func NewCampaignHandler(app *ServerApp) *campaign.CampaignHandler {
+	return campaign.NewCampaignHandler(NewCampaignService(app))
 }
 
-func NewUserHandler(app *ServerApp) *handlers.UserHandler {
-	return handlers.NewUserHandler(NewUserService(app))
+func NewUserHandler(app *ServerApp) *user.UserHandler {
+	return user.NewUserHandler(NewUserService(app))
 }
 
-func NewUserCampaignHandler(app *ServerApp) *handlers.UserCampaignHandler {
-	return handlers.NewUserCampaignHandler(NewUserCampaignService(app))
+func NewUserCampaignHandler(app *ServerApp) *user_campaign.UserCampaignHandler {
+	return user_campaign.NewUserCampaignHandler(NewUserCampaignService(app))
 }
 
 // http server

@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"go_notifier/internal/dto"
+	"go_notifier/internal/common"
 	internal_errors "go_notifier/internal/http/errors"
 	"io"
 	"net/http"
 )
 
-func CreateAndValidateFromRequest(r *http.Request, dto dto.Validatable) error {
+func CreateAndValidateFromRequest(r *http.Request, request common.Validatable) error {
 	var buf bytes.Buffer
 	_, err := io.Copy(&buf, r.Body)
 	if err != nil {
@@ -20,11 +20,11 @@ func CreateAndValidateFromRequest(r *http.Request, dto dto.Validatable) error {
 	requestData := buf.Bytes()
 	r.Body.Close()
 
-	if err := json.Unmarshal(requestData, &dto); err != nil {
+	if err := json.Unmarshal(requestData, &request); err != nil {
 		return internal_errors.Wrap(err, "unable unmarshal request data", internal_errors.RequestErrUnmarshal)
 	}
 
-	err = dto.Validate()
+	err = request.Validate()
 	if err != nil {
 		return internal_errors.Wrap(err, "request data is not valid", internal_errors.RequestErrNotValid)
 	}

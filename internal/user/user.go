@@ -1,8 +1,8 @@
-package service
+package user
 
 import (
 	"fmt"
-	"go_notifier/internal/dto"
+	"go_notifier/internal/common"
 	"go_notifier/pkg/database"
 )
 
@@ -16,14 +16,14 @@ func NewUserService(db *database.AppDB) *UserService {
 	}
 }
 
-func (s *UserService) CreateUser(dto *dto.User) (int64, error) {
+func (s *UserService) CreateUser(request *common.UserRequest) (int64, error) {
 	insertStatement, err := s.db.Mysql.Prepare("INSERT INTO user(uuid, email, timezone) VALUES (?, ?, ?)")
 	if err != nil {
 		return 0, err
 	}
 	defer insertStatement.Close()
 
-	res, err := insertStatement.Exec(dto.UUID, dto.Email, dto.Timezone)
+	res, err := insertStatement.Exec(request.UUID, request.Email, request.Timezone)
 	if err != nil {
 		return 0, err
 	}

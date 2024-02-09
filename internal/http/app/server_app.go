@@ -23,7 +23,7 @@ func NewServerApp(ctx context.Context, cfg *configs.AppConfig) *ServerApp {
 	if err != nil {
 		panic(err)
 	}
-	db.RunMigrations("internal/db/migrations")
+	db.RunMigrations("internal/migrations")
 
 	return &ServerApp{
 		cfg:    appConfig,

@@ -1,14 +1,14 @@
-package handlers
+package device
 
 import (
 	"encoding/json"
-	"go_notifier/internal/dto"
+	"go_notifier/internal/common"
 	"go_notifier/internal/http/helpers"
 	"net/http"
 )
 
-type DeviceService interface {
-	CreateDevice(dto *dto.Device) (int64, error)
+type DeviceServiceInterface interface {
+	CreateDevice(request *common.DeviceRequest) (int64, error)
 }
 
 type CreateDeviceResponse struct {
@@ -16,10 +16,10 @@ type CreateDeviceResponse struct {
 }
 
 type DeviceHandler struct {
-	service DeviceService
+	service DeviceServiceInterface
 }
 
-func NewDeviceHandler(service DeviceService) *DeviceHandler {
+func NewDeviceHandler(service DeviceServiceInterface) *DeviceHandler {
 	return &DeviceHandler{
 		service: service,
 	}
@@ -27,22 +27,22 @@ func NewDeviceHandler(service DeviceService) *DeviceHandler {
 
 func (h *DeviceHandler) CreateDevice(w http.ResponseWriter, r *http.Request) {
 	// request
-	var dto dto.Device
-	err := helpers.CreateAndValidateFromRequest(r, &dto)
+	var request common.DeviceRequest
+	err := helpers.CreateAndValidateFromRequest(r, &request)
 	if err != nil {
 		helpers.HandleRequestError(err, w)
 		return
 	}
 
 	// run business logic
-	_, err = h.service.CreateDevice(&dto)
+	_, err = h.service.CreateDevice(&request)
 	if err != nil {
 		http.Error(w, "error while device creation", http.StatusInternalServerError)
 		return
 	}
 
 	// response
-	responseData := CreateDeviceResponse{Token: dto.Token}
+	responseData := CreateDeviceResponse{Token: request.Token}
 	jsonResponse, err := json.Marshal(responseData)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

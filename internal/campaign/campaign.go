@@ -1,8 +1,8 @@
-package service
+package campaign
 
 import (
 	"fmt"
-	"go_notifier/internal/dto"
+	"go_notifier/internal/common"
 	"go_notifier/pkg/database"
 	"strings"
 
@@ -19,7 +19,7 @@ func NewCampaignService(db *database.AppDB) *CampaignService {
 	}
 }
 
-func (s *CampaignService) CreateCampaign(dto *dto.Campaign) (string, error) {
+func (s *CampaignService) CreateCampaign(dto *common.CampaignRequest) (string, error) {
 	newUUID := uuid.New().String()
 
 	insertStatement, err := s.db.Mysql.Prepare("INSERT INTO campaign(uuid, name, message, time, days_of_week) VALUES (?, ?, ?, ?, ?)")

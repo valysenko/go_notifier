@@ -1,8 +1,8 @@
-package service
+package campaign
 
 import (
 	"errors"
-	"go_notifier/internal/dto"
+	"go_notifier/internal/common"
 	"go_notifier/pkg/database"
 	"strings"
 	"testing"
@@ -16,7 +16,7 @@ func TestCreateCampaign(t *testing.T) {
 	defer db.Mysql.Close()
 	s := NewCampaignService(db)
 
-	dto := &dto.Campaign{
+	dto := &common.CampaignRequest{
 		Name:       "MyCampaign",
 		Message:    "Hello, world!",
 		Time:       "12:00 PM",

@@ -1,9 +1,10 @@
-package service
+package user_campaign
 
 import (
-	"go_notifier/internal/db/repository"
-	"go_notifier/internal/dto"
-	"go_notifier/internal/service/mocks"
+	"go_notifier/internal/campaign"
+	"go_notifier/internal/common"
+	"go_notifier/internal/user"
+	"go_notifier/internal/user_campaign/mocks"
 	"go_notifier/pkg/database"
 	"testing"
 
@@ -18,7 +19,7 @@ func TestCreateUserCampaign(t *testing.T) {
 	mockUserRepo := mocks.NewUserRepository(t)
 	s := NewUserCampaignService(db, mockUserRepo, mockCampaignRepo)
 
-	dto := &dto.CampaignUser{
+	dto := &common.CampaignUserRequest{
 		CampaignUUID: "uuid1",
 		UserUUID:     "uuid2",
 	}
@@ -28,13 +29,13 @@ func TestCreateUserCampaign(t *testing.T) {
 			var expectedUserId int = 5
 			var expectedCampaignId int = 7
 
-			userResp := &repository.UserIdTimezone{
+			userResp := &user.UserIdTimezone{
 				ID:       expectedUserId,
 				Timezone: userTimezone,
 			}
 			mockUserRepo.On("GetUserIDAndTimezoneByUUID", dto.UserUUID).Once().Return(userResp, nil)
 
-			campaignResp := &repository.CampaignIdTime{
+			campaignResp := &campaign.CampaignIdTime{
 				ID:   expectedCampaignId,
 				Time: campaignTime,
 			}

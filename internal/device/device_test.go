@@ -1,8 +1,8 @@
-package service
+package device
 
 import (
-	"go_notifier/internal/dto"
-	"go_notifier/internal/service/mocks"
+	"go_notifier/internal/common"
+	"go_notifier/internal/device/mocks"
 	"go_notifier/pkg/database"
 	"testing"
 
@@ -16,7 +16,7 @@ func TestCreateDevice(t *testing.T) {
 	mockUserRepo := mocks.NewUserRepository(t)
 	s := NewDeviceService(db, mockUserRepo)
 
-	dto := &dto.Device{
+	dto := &common.DeviceRequest{
 		Token:    "token",
 		UserUUID: "uuid",
 	}

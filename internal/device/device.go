@@ -1,9 +1,14 @@
-package service
+package device
 
 import (
-	"go_notifier/internal/dto"
+	"go_notifier/internal/common"
 	"go_notifier/pkg/database"
 )
+
+// go:generate go run github.com/vektra/mockery/v2@v2.20.0 --name=UserRepository --case snake
+type UserRepository interface {
+	GetUserIDByUUID(uuid string) (int64, error)
+}
 
 type DeviceService struct {
 	db             *database.AppDB
@@ -17,8 +22,8 @@ func NewDeviceService(db *database.AppDB, userRepo UserRepository) *DeviceServic
 	}
 }
 
-func (s *DeviceService) CreateDevice(dto *dto.Device) (int64, error) {
-	userId, err := s.userRepository.GetUserIDByUUID(dto.UserUUID)
+func (s *DeviceService) CreateDevice(request *common.DeviceRequest) (int64, error) {
+	userId, err := s.userRepository.GetUserIDByUUID(request.UserUUID)
 	if err != nil {
 		return 0, err
 	}
@@ -29,7 +34,7 @@ func (s *DeviceService) CreateDevice(dto *dto.Device) (int64, error) {
 	}
 	defer insertStatement.Close()
 
-	res, err := insertStatement.Exec(dto.Token, userId)
+	res, err := insertStatement.Exec(request.Token, userId)
 	if err != nil {
 		return 0, err
 	}

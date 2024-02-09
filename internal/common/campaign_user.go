@@ -1,13 +1,13 @@
-package dto
+package common
 
 import "errors"
 
-type CampaignUser struct {
+type CampaignUserRequest struct {
 	CampaignUUID string `json:"campaign_uuid"`
 	UserUUID     string `json:"user_uuid"`
 }
 
-func (d *CampaignUser) Validate() error {
+func (d *CampaignUserRequest) Validate() error {
 	if d.CampaignUUID == "" || d.UserUUID == "" {
 		return errors.New("invalid campaign_user")
 	}

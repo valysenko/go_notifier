@@ -1,17 +1,15 @@
-package handlers
+package user
 
 import (
 	"bytes"
 	"encoding/json"
 	"go_notifier/configs"
-	"go_notifier/internal/service"
 	"go_notifier/pkg/database"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -40,16 +38,16 @@ func (suite *UserHandlerSuite) SetupSuite() {
 	} else {
 		log.Println("db connection ok")
 	}
-	db.RunMigrations("../../../internal/db/migrations")
+	db.RunMigrations("../migrations")
 }
 
 func (suite *UserHandlerSuite) TearDownSuite() {
-	db.DownMigrations("../../../internal/db/migrations")
+	db.DownMigrations("../migrations")
 	db.Mysql.Close()
 }
 
 func (suite *UserHandlerSuite) TestCreateUserHandlerSuccess() {
-	userService := service.NewUserService(db)
+	userService := NewUserService(db)
 	userHandler := NewUserHandler(userService)
 	ts := httptest.NewServer(http.HandlerFunc(userHandler.CreateUserHandler))
 	defer ts.Close()
@@ -67,7 +65,7 @@ func (suite *UserHandlerSuite) TestCreateUserHandlerSuccess() {
 }
 
 func (suite *UserHandlerSuite) TestCreateUserHandlerFailure() {
-	userService := service.NewUserService(db)
+	userService := NewUserService(db)
 	userHandler := NewUserHandler(userService)
 	ts := httptest.NewServer(http.HandlerFunc(userHandler.CreateUserHandler))
 	defer ts.Close()

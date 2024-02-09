@@ -1,13 +1,13 @@
-package dto
+package common
 
 import "errors"
 
-type Device struct {
+type DeviceRequest struct {
 	Token    string `json:"token"`
 	UserUUID string `json:"user_uuid"`
 }
 
-func (d *Device) Validate() error {
+func (d *DeviceRequest) Validate() error {
 	if d.Token == "" || d.UserUUID == "" {
 		return errors.New("invalid device")
 	}

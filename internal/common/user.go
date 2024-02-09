@@ -1,14 +1,14 @@
-package dto
+package common
 
 import "errors"
 
-type User struct {
+type UserRequest struct {
 	UUID     string `json:"uuid"`
 	Email    string `json:"email"`
 	Timezone string `json:"timezone"`
 }
 
-func (u *User) Validate() error {
+func (u *UserRequest) Validate() error {
 	if u.UUID == "" || u.Email == "" || u.Timezone == "" {
 		return errors.New("invalid user")
 	}

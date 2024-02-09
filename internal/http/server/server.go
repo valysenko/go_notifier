@@ -2,7 +2,10 @@ package server
 
 import (
 	"go_notifier/configs"
-	"go_notifier/internal/http/handlers"
+	"go_notifier/internal/campaign"
+	"go_notifier/internal/device"
+	"go_notifier/internal/user"
+	"go_notifier/internal/user_campaign"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -13,19 +16,19 @@ type HttpServer struct {
 	router              *chi.Mux
 	port                string
 	logger              log.FieldLogger
-	deviceHandler       *handlers.DeviceHandler
-	campaignHandler     *handlers.CampaignHandler
-	userHandler         *handlers.UserHandler
-	userCampaignHandler *handlers.UserCampaignHandler
+	deviceHandler       *device.DeviceHandler
+	campaignHandler     *campaign.CampaignHandler
+	userHandler         *user.UserHandler
+	userCampaignHandler *user_campaign.UserCampaignHandler
 }
 
 func InitServer(
 	serverConfig *configs.HttpServerConfig,
 	logger log.FieldLogger,
-	deviceHandler *handlers.DeviceHandler,
-	campaignHandler *handlers.CampaignHandler,
-	userHandler *handlers.UserHandler,
-	userCampaignHandler *handlers.UserCampaignHandler,
+	deviceHandler *device.DeviceHandler,
+	campaignHandler *campaign.CampaignHandler,
+	userHandler *user.UserHandler,
+	userCampaignHandler *user_campaign.UserCampaignHandler,
 ) *HttpServer {
 	return &HttpServer{
 		router:              chi.NewRouter(),
