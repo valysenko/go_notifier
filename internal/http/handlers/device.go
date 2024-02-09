@@ -4,15 +4,28 @@ import (
 	"encoding/json"
 	"go_notifier/internal/dto"
 	"go_notifier/internal/http/helpers"
-	"go_notifier/internal/service"
 	"net/http"
 )
+
+type DeviceService interface {
+	CreateDevice(dto *dto.Device) (int64, error)
+}
 
 type CreateDeviceResponse struct {
 	Token string `json:"token"`
 }
 
-func CreateDeviceHandler(w http.ResponseWriter, r *http.Request) {
+type DeviceHandler struct {
+	service DeviceService
+}
+
+func NewDeviceHandler(service DeviceService) *DeviceHandler {
+	return &DeviceHandler{
+		service: service,
+	}
+}
+
+func (h *DeviceHandler) CreateDevice(w http.ResponseWriter, r *http.Request) {
 	// request
 	var dto dto.Device
 	err := helpers.CreateAndValidateFromRequest(r, &dto)
@@ -22,7 +35,7 @@ func CreateDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// run business logic
-	_, err = service.CreateDevice(&dto)
+	_, err = h.service.CreateDevice(&dto)
 	if err != nil {
 		http.Error(w, "error while device creation", http.StatusInternalServerError)
 		return

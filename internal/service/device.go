@@ -5,13 +5,25 @@ import (
 	"go_notifier/pkg/database"
 )
 
-func CreateDevice(dto *dto.Device) (int64, error) {
-	userId, err := userRepository.GetUserIDByUUID(dto.UserUUID)
+type DeviceService struct {
+	db             *database.AppDB
+	userRepository UserRepository
+}
+
+func NewDeviceService(db *database.AppDB, userRepo UserRepository) *DeviceService {
+	return &DeviceService{
+		db:             db,
+		userRepository: userRepo,
+	}
+}
+
+func (s *DeviceService) CreateDevice(dto *dto.Device) (int64, error) {
+	userId, err := s.userRepository.GetUserIDByUUID(dto.UserUUID)
 	if err != nil {
 		return 0, err
 	}
 
-	insertStatement, err := database.DB.Mysql.Prepare("INSERT INTO device(token, user_id) VALUES (?, ?)")
+	insertStatement, err := s.db.Mysql.Prepare("INSERT INTO device(token, user_id) VALUES (?, ?)")
 	if err != nil {
 		return 0, err
 	}

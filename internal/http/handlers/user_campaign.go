@@ -5,15 +5,28 @@ import (
 	"fmt"
 	"go_notifier/internal/dto"
 	"go_notifier/internal/http/helpers"
-	"go_notifier/internal/service"
 	"net/http"
 )
+
+type UserCampaignService interface {
+	CreateUserCampaign(dto *dto.CampaignUser) (string, error)
+}
 
 type CreateUserCampaignResponse struct {
 	Time string `json:"time"`
 }
 
-func CreateUserCampaignHandler(w http.ResponseWriter, r *http.Request) {
+type UserCampaignHandler struct {
+	service UserCampaignService
+}
+
+func NewUserCampaignHandler(s UserCampaignService) *UserCampaignHandler {
+	return &UserCampaignHandler{
+		service: s,
+	}
+}
+
+func (h *UserCampaignHandler) CreateUserCampaign(w http.ResponseWriter, r *http.Request) {
 	// request
 	var dto dto.CampaignUser
 	err := helpers.CreateAndValidateFromRequest(r, &dto)
@@ -23,7 +36,7 @@ func CreateUserCampaignHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// run business logic
-	time, err := service.CreateUserCampaign(&dto)
+	time, err := h.service.CreateUserCampaign(&dto)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "error while campaign-user creation", http.StatusInternalServerError)

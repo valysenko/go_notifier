@@ -9,7 +9,7 @@ import (
 )
 
 // https://go.dev/wiki/CodeReviewComments#interfaces
-//
+
 //go:generate go run github.com/vektra/mockery/v2@v2.20.0 --name=UserRepository --case snake
 type UserRepository interface {
 	GetUserIDByUUID(uuid string) (int64, error)
@@ -21,36 +21,34 @@ type CampaignRepository interface {
 	GetCampgignIdAndTimeByUUID(uuid string) (*repository.CampaignIdTime, error)
 }
 
-var userRepository UserRepository
-var campaignRepository CampaignRepository
-
-func SetCampaignRepository(repo CampaignRepository) {
-	campaignRepository = repo
+type UserCampaignService struct {
+	db                 *database.AppDB
+	campaignRepository CampaignRepository
+	userRepository     UserRepository
 }
 
-func SetUserRepository(repo UserRepository) {
-	userRepository = repo
+func NewUserCampaignService(db *database.AppDB, userRepo UserRepository, campaignRepo CampaignRepository) *UserCampaignService {
+	return &UserCampaignService{
+		db:                 db,
+		campaignRepository: campaignRepo,
+		userRepository:     userRepo,
+	}
 }
 
-func init() {
-	campaignRepository = &repository.MysqlCampaignRepository{}
-	userRepository = &repository.MysqlUserRepository{}
-}
-
-func CreateUserCampaign(dto *dto.CampaignUser) (string, error) {
-	user, err := userRepository.GetUserIDAndTimezoneByUUID(dto.UserUUID)
+func (s *UserCampaignService) CreateUserCampaign(dto *dto.CampaignUser) (string, error) {
+	user, err := s.userRepository.GetUserIDAndTimezoneByUUID(dto.UserUUID)
 	if err != nil {
 		return "", err
 	}
 
-	campaign, err := campaignRepository.GetCampgignIdAndTimeByUUID(dto.CampaignUUID)
+	campaign, err := s.campaignRepository.GetCampgignIdAndTimeByUUID(dto.CampaignUUID)
 	if err != nil {
 		return "", err
 	}
 
-	userCampaignTime, err := calculateUserCampaignTime(campaign.Time, user.Timezone)
+	userCampaignTime, err := s.calculateUserCampaignTime(campaign.Time, user.Timezone)
 
-	insertStatement, err := database.DB.Mysql.Prepare("INSERT INTO user_campaign(campaign_id, user_id, time) VALUES (?,?, ?)")
+	insertStatement, err := s.db.Mysql.Prepare("INSERT INTO user_campaign(campaign_id, user_id, time) VALUES (?,?, ?)")
 	if err != nil {
 		return "", err
 	}
@@ -72,7 +70,7 @@ func CreateUserCampaign(dto *dto.CampaignUser) (string, error) {
 * - for users from Ukraine, it should be 8:00 UTC time - notifications for those users will be sent in 8:00 UTC
 * - for users from Germany, it should be 9:00 UTC time - notifications for those users will be sent in 9:00 UTC
  */
-func calculateUserCampaignTime(campaignTime, userTimezone string) (string, error) {
+func (s *UserCampaignService) calculateUserCampaignTime(campaignTime, userTimezone string) (string, error) {
 	userLocation, err := time.LoadLocation(userTimezone)
 	if err != nil {
 		return "", err

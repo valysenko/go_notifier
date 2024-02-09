@@ -9,10 +9,20 @@ import (
 	"github.com/google/uuid"
 )
 
-func CreateCampaign(dto *dto.Campaign) (string, error) {
+type CampaignService struct {
+	db *database.AppDB
+}
+
+func NewCampaignService(db *database.AppDB) *CampaignService {
+	return &CampaignService{
+		db: db,
+	}
+}
+
+func (s *CampaignService) CreateCampaign(dto *dto.Campaign) (string, error) {
 	newUUID := uuid.New().String()
 
-	insertStatement, err := database.DB.Mysql.Prepare("INSERT INTO campaign(uuid, name, message, time, days_of_week) VALUES (?, ?, ?, ?, ?)")
+	insertStatement, err := s.db.Mysql.Prepare("INSERT INTO campaign(uuid, name, message, time, days_of_week) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		fmt.Println(err)
 		return "", err

@@ -51,7 +51,7 @@ func (e *Publisher) Push(queueName string, event []byte) error {
 		fmt.Println(err.Error())
 	}
 
-	fmt.Println("Sending message: %s -> %s", event, queueName)
+	fmt.Printf("Sending message: %s -> %s", event, queueName)
 
 	return nil
 }

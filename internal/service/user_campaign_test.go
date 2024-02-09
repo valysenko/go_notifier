@@ -13,17 +13,15 @@ import (
 
 func TestCreateUserCampaign(t *testing.T) {
 	db, mock := database.InitMockDB(t)
-	defer db.Close()
+	defer db.Mysql.Close()
+	mockCampaignRepo := mocks.NewCampaignRepository(t)
+	mockUserRepo := mocks.NewUserRepository(t)
+	s := NewUserCampaignService(db, mockUserRepo, mockCampaignRepo)
 
 	dto := &dto.CampaignUser{
 		CampaignUUID: "uuid1",
 		UserUUID:     "uuid2",
 	}
-
-	mockCampaignRepo := mocks.NewCampaignRepository(t)
-	mockUserRepo := mocks.NewUserRepository(t)
-	SetCampaignRepository(mockCampaignRepo)
-	SetUserRepository(mockUserRepo)
 
 	successFunc := func(userTimezone, campaignTime, calculatedTimeForUser string) func(t *testing.T) {
 		return func(t *testing.T) {
@@ -47,7 +45,7 @@ func TestCreateUserCampaign(t *testing.T) {
 				WithArgs(campaignResp.ID, userResp.ID, calculatedTimeForUser).
 				WillReturnResult(sqlmock.NewResult(1, 1))
 
-			_, err := CreateUserCampaign(dto)
+			_, err := s.CreateUserCampaign(dto)
 			assert.Nil(t, err)
 		}
 	}

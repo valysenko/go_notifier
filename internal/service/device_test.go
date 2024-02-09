@@ -12,10 +12,9 @@ import (
 
 func TestCreateDevice(t *testing.T) {
 	db, mock := database.InitMockDB(t)
-	defer db.Close()
-
+	defer db.Mysql.Close()
 	mockUserRepo := mocks.NewUserRepository(t)
-	SetUserRepository(mockUserRepo)
+	s := NewDeviceService(db, mockUserRepo)
 
 	dto := &dto.Device{
 		Token:    "token",
@@ -30,7 +29,7 @@ func TestCreateDevice(t *testing.T) {
 			WithArgs(dto.Token, expectedId).
 			WillReturnResult(sqlmock.NewResult(expectedId, 1))
 
-		id, err := CreateDevice(dto)
+		id, err := s.CreateDevice(dto)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedId, id)
 	})

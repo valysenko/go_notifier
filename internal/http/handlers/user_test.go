@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"go_notifier/configs"
+	"go_notifier/internal/service"
 	"go_notifier/pkg/database"
 	"log"
 	"net/http"
@@ -48,7 +49,9 @@ func (suite *UserHandlerSuite) TearDownSuite() {
 }
 
 func (suite *UserHandlerSuite) TestCreateUserHandlerSuccess() {
-	ts := httptest.NewServer(http.HandlerFunc(CreateUserHandler))
+	userService := service.NewUserService(db)
+	userHandler := NewUserHandler(userService)
+	ts := httptest.NewServer(http.HandlerFunc(userHandler.CreateUserHandler))
 	defer ts.Close()
 
 	requestBody := []byte(`{"UUID": "uuid", "email": "john@example.com", "timezone": "UTC"}`)
@@ -64,7 +67,9 @@ func (suite *UserHandlerSuite) TestCreateUserHandlerSuccess() {
 }
 
 func (suite *UserHandlerSuite) TestCreateUserHandlerFailure() {
-	ts := httptest.NewServer(http.HandlerFunc(CreateUserHandler))
+	userService := service.NewUserService(db)
+	userHandler := NewUserHandler(userService)
+	ts := httptest.NewServer(http.HandlerFunc(userHandler.CreateUserHandler))
 	defer ts.Close()
 
 	suite.Run("check validation failure", func() {

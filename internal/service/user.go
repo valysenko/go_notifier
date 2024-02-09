@@ -6,8 +6,18 @@ import (
 	"go_notifier/pkg/database"
 )
 
-func CreateUser(dto *dto.User) (int64, error) {
-	insertStatement, err := database.DB.Mysql.Prepare("INSERT INTO user(uuid, email, timezone) VALUES (?, ?, ?)")
+type UserService struct {
+	db *database.AppDB
+}
+
+func NewUserService(db *database.AppDB) *UserService {
+	return &UserService{
+		db: db,
+	}
+}
+
+func (s *UserService) CreateUser(dto *dto.User) (int64, error) {
+	insertStatement, err := s.db.Mysql.Prepare("INSERT INTO user(uuid, email, timezone) VALUES (?, ?, ?)")
 	if err != nil {
 		return 0, err
 	}

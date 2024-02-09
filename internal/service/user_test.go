@@ -12,7 +12,8 @@ import (
 
 func TestCreateUser(t *testing.T) {
 	db, mock := database.InitMockDB(t)
-	defer db.Close()
+	defer db.Mysql.Close()
+	s := NewUserService(db)
 
 	dto := &dto.User{
 		UUID:     "uuid",
@@ -27,7 +28,7 @@ func TestCreateUser(t *testing.T) {
 			WithArgs(dto.UUID, dto.Email, dto.Timezone).
 			WillReturnResult(sqlmock.NewResult(expectedId, 1))
 
-		id, err := CreateUser(dto)
+		id, err := s.CreateUser(dto)
 		assert.Nil(t, err)
 		assert.Equal(t, expectedId, id)
 	})
@@ -39,7 +40,7 @@ func TestCreateUser(t *testing.T) {
 			ExpectExec().
 			WithArgs(dto.UUID, dto.Email, dto.Timezone).WillReturnError(expectedError)
 
-		id, err := CreateUser(dto)
+		id, err := s.CreateUser(dto)
 		assert.NotNil(t, err)
 		assert.Equal(t, int64(0), id)
 

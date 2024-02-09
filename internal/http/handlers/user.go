@@ -5,17 +5,30 @@ import (
 	"errors"
 	"go_notifier/internal/dto"
 	"go_notifier/internal/http/helpers"
-	"go_notifier/internal/service"
 	"net/http"
 
 	"github.com/go-sql-driver/mysql"
 )
 
+type UserService interface {
+	CreateUser(dto *dto.User) (int64, error)
+}
+
 type CreateUserResponse struct {
 	UUID string `json:"uuid"`
 }
 
-func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+type UserHandler struct {
+	service UserService
+}
+
+func NewUserHandler(service UserService) *UserHandler {
+	return &UserHandler{
+		service: service,
+	}
+}
+
+func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	// request
 	var dto dto.User
 	err := helpers.CreateAndValidateFromRequest(r, &dto)
@@ -25,7 +38,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// run business logic
-	_, err = service.CreateUser(&dto)
+	_, err = h.service.CreateUser(&dto)
 	if err != nil {
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {

@@ -4,15 +4,28 @@ import (
 	"encoding/json"
 	"go_notifier/internal/dto"
 	"go_notifier/internal/http/helpers"
-	"go_notifier/internal/service"
 	"net/http"
 )
+
+type CampaignService interface {
+	CreateCampaign(dto *dto.Campaign) (string, error)
+}
 
 type CreateCampaignResponse struct {
 	UUID string `json:"uuid"`
 }
 
-func CreateCampaignHandler(w http.ResponseWriter, r *http.Request) {
+type CampaignHandler struct {
+	service CampaignService
+}
+
+func NewCampaignHandler(s CampaignService) *CampaignHandler {
+	return &CampaignHandler{
+		service: s,
+	}
+}
+
+func (h *CampaignHandler) CreateCampaign(w http.ResponseWriter, r *http.Request) {
 	// request
 	var dto dto.Campaign
 	err := helpers.CreateAndValidateFromRequest(r, &dto)
@@ -22,7 +35,7 @@ func CreateCampaignHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// run business logic
-	campaignUUID, err := service.CreateCampaign(&dto)
+	campaignUUID, err := h.service.CreateCampaign(&dto)
 	if err != nil {
 		http.Error(w, "error while campaign creation", http.StatusInternalServerError)
 		return

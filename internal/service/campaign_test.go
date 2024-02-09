@@ -13,7 +13,8 @@ import (
 
 func TestCreateCampaign(t *testing.T) {
 	db, mock := database.InitMockDB(t)
-	defer db.Close()
+	defer db.Mysql.Close()
+	s := NewCampaignService(db)
 
 	dto := &dto.Campaign{
 		Name:       "MyCampaign",
@@ -28,7 +29,7 @@ func TestCreateCampaign(t *testing.T) {
 			WithArgs(sqlmock.AnyArg(), dto.Name, dto.Message, dto.Time, strings.Join(dto.DaysOfWeek, ",")).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
-		uuid, err := CreateCampaign(dto)
+		uuid, err := s.CreateCampaign(dto)
 		assert.Nil(t, err)
 		assert.Len(t, uuid, 36)
 	})
@@ -36,7 +37,7 @@ func TestCreateCampaign(t *testing.T) {
 	t.Run("create campaign prepare failure", func(t *testing.T) {
 		expectedError := errors.New("error")
 		mock.ExpectPrepare("INSERT INTO campaign").WillReturnError(expectedError)
-		uuid, err := CreateCampaign(dto)
+		uuid, err := s.CreateCampaign(dto)
 		assert.NotNil(t, err)
 		assert.Equal(t, expectedError, err)
 		assert.Equal(t, "", uuid)
@@ -48,7 +49,7 @@ func TestCreateCampaign(t *testing.T) {
 			ExpectExec().
 			WithArgs(sqlmock.AnyArg(), dto.Name, dto.Message, dto.Time, strings.Join(dto.DaysOfWeek, ",")).
 			WillReturnError(expectedError)
-		uuid, err := CreateCampaign(dto)
+		uuid, err := s.CreateCampaign(dto)
 		assert.NotNil(t, err)
 		assert.Equal(t, expectedError, err)
 		assert.Equal(t, "", uuid)

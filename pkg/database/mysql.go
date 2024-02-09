@@ -9,8 +9,6 @@ import (
 	"github.com/pressly/goose"
 )
 
-var DB *AppDB
-
 type AppDB struct {
 	Mysql *sql.DB
 }
@@ -24,11 +22,9 @@ func InitDB(dbConfig *configs.DBConfig) *AppDB {
 	db.SetMaxOpenConns(dbConfig.MaxOpenConns)
 	db.SetMaxIdleConns(dbConfig.MaxIdleConns)
 
-	DB = &AppDB{
+	return &AppDB{
 		Mysql: db,
 	}
-
-	return DB
 }
 
 // goose create create_user_campaign_table sql

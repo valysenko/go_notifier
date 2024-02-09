@@ -1,20 +1,17 @@
 package database
 
 import (
-	"database/sql"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )
 
-func InitMockDB(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
+func InitMockDB(t *testing.T) (*AppDB, sqlmock.Sqlmock) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("An error occurred while creating mock: %s", err)
 	}
-	DB = &AppDB{
+	return &AppDB{
 		Mysql: db,
-	}
-
-	return db, mock
+	}, mock
 }
