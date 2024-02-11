@@ -88,6 +88,7 @@ func (s *UserCampaignService) calculateUserCampaignTime(campaignTime, userTimezo
 		desiredTimeObj.Hour(), desiredTimeObj.Minute(), desiredTimeObj.Second(), 0, userLocation)
 
 	userDateTimeUTC := userDateTime.UTC()
+	userDateTimeUTC = userDateTimeUTC.Truncate(time.Minute) // it will set seconds=00
 	userCampaignTime := userDateTimeUTC.Format("15:04:05")
 
 	fmt.Println("Desired Time in User's Timezone:", userDateTime.Format("2006-01-02 15:04"))

@@ -34,7 +34,7 @@ func NewDeviceService(app *ServerApp) *device.DeviceService {
 }
 
 func NewCampaignService(app *ServerApp) *campaign.CampaignService {
-	return campaign.NewCampaignService(app.mysql)
+	return campaign.NewCampaignService(app.mysql, NewCampaignRepository(app), app.logger)
 }
 
 func NewUserService(app *ServerApp) *user.UserService {
