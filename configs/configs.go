@@ -14,6 +14,7 @@ type AppConfig struct {
 	AppEnv string `env:"APP_ENV" env-default:"loc"`
 	DBConfig
 	HttpServerConfig
+	RabbitConfig
 }
 
 type DBConfig struct {
@@ -26,6 +27,22 @@ type DBConfig struct {
 	MaxIdleConns    int    `env:"DB_MAX_IDLE_CONNS"`
 	ConnMaxLifetime time.Duration
 	ConnMaxIdleTime time.Duration
+}
+
+type RabbitConfig struct {
+	Host     string `env:"RABBITMQ_HOST" env-default:"localhost"`
+	Port     string `env:"RABBITMQ_PORT" env-default:"5672"`
+	User     string `env:"RABBITMQ_USER" env-default:"guest"`
+	Password string `env:"RABBITMQ_PASSWORD" env-default:"guest"`
+}
+
+func (cfg *RabbitConfig) ProvideDSN() string {
+	return fmt.Sprintf("amqp://%s:%s@%s:%s",
+		url.QueryEscape(cfg.User),
+		url.QueryEscape(cfg.Password),
+		cfg.Host,
+		cfg.Port,
+	)
 }
 
 type HttpServerConfig struct {

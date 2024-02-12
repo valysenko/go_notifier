@@ -8,13 +8,15 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateCampaign(t *testing.T) {
+	log.SetLevel(log.FatalLevel)
 	db, mock := database.InitMockDB(t)
 	defer db.Mysql.Close()
-	s := NewCampaignService(db)
+	s := NewCampaignService(db, NewMysqlCampaignRepository(db), log.New())
 
 	dto := &common.CampaignRequest{
 		Name:       "MyCampaign",

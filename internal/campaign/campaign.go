@@ -18,6 +18,7 @@ type CampaignService struct {
 	logger     log.FieldLogger
 }
 
+// go:generate go run github.com/vektra/mockery/v2@v2.20.0 --name=CampaignRepository --case snake
 type CampaignRepository interface {
 	GetScheduledNotifications(day, currentTime string) ([]*ScheduledNotification, error)
 }

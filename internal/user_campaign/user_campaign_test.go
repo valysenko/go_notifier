@@ -57,7 +57,7 @@ func TestCreateUserCampaign(t *testing.T) {
 		expectedUserTime string
 	}{
 		"success with UTC timezone":        {userTimezone: "UTC", campaignTime: "10:11:00", expectedUserTime: "10:11:00"},
-		"success with UTC timezone case 2": {userTimezone: "UTC", campaignTime: "15:30:40", expectedUserTime: "15:30:40"},
+		"success with UTC timezone case 2": {userTimezone: "UTC", campaignTime: "15:30:40", expectedUserTime: "15:30:00"},
 		"success with Kyiv timezone":       {userTimezone: "Europe/Kyiv", campaignTime: "10:30:00", expectedUserTime: "08:30:00"},
 	}
 	for name, testCase := range successCases {

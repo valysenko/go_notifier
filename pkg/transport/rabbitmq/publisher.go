@@ -1,30 +1,31 @@
 package rabbitmq
 
 import (
-	"fmt"
-
+	log "github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
 type Publisher struct {
 	connection *amqp.Connection
+	logger     log.FieldLogger
 }
 
-func NewPublisher(conn *amqp.Connection) *Publisher {
+func NewPublisher(conn *amqp.Connection, logger log.FieldLogger) *Publisher {
 	return &Publisher{
 		connection: conn,
+		logger:     logger,
 	}
 }
 
-func (e *Publisher) Push(queueName string, event []byte) error {
-	channel, err := e.connection.Channel()
+func (p *Publisher) Publish(queueName string, event []byte) error {
+	channel, err := p.connection.Channel()
 	if err != nil {
 		return err
 	}
 
 	defer channel.Close()
 
-	queue, err := channel.QueueDeclare(
+	_, err = channel.QueueDeclare(
 		queueName, // name
 		true,      // durable
 		false,     // delete when unused
@@ -33,9 +34,8 @@ func (e *Publisher) Push(queueName string, event []byte) error {
 		nil,       // arguments
 	)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
-	fmt.Println(queue.Name)
 
 	err = channel.Publish(
 		"",        // exchange
@@ -48,10 +48,10 @@ func (e *Publisher) Push(queueName string, event []byte) error {
 		},
 	)
 	if err != nil {
-		fmt.Println(err.Error())
+		return err
 	}
 
-	fmt.Printf("Sending message: %s -> %s", event, queueName)
+	p.logger.Infof("[producer] queue=[%s] sent message=%s", queueName, string(event))
 
 	return nil
 }
