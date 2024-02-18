@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"go_notifier/configs"
-	"go_notifier/internal/notifier/app"
+	"go_notifier/internal/app/notifier/app"
 
 	_ "github.com/go-sql-driver/mysql"
 )

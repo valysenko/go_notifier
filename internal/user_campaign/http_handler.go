@@ -3,8 +3,8 @@ package user_campaign
 import (
 	"encoding/json"
 	"fmt"
+	"go_notifier/internal/app/http/helpers"
 	"go_notifier/internal/common"
-	"go_notifier/internal/http/helpers"
 	"net/http"
 )
 

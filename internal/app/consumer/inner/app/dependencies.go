@@ -1,8 +1,8 @@
 package app
 
 import (
+	"go_notifier/internal/app/consumer/inner/handler"
 	"go_notifier/internal/common"
-	"go_notifier/internal/consumer/inner/handler"
 	"go_notifier/pkg/transport/rabbitmq"
 	"os"
 
@@ -28,6 +28,9 @@ func NewConsumersMessageHandlers(app *ConsumerApp) rabbitmq.MessageHandlersMap {
 	}
 	mp[common.RabbitSecondQueue] = []rabbitmq.MessageHandler{
 		&handler.SecondQueueMessageHandler{},
+	}
+	mp[common.ScheduledNotificationsQueue] = []rabbitmq.MessageHandler{
+		handler.NewScheduledNotificationHandler(app.logger),
 	}
 
 	return mp

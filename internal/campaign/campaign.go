@@ -16,6 +16,7 @@ type CampaignService struct {
 	db         *database.AppDB
 	repository CampaignRepository
 	logger     log.FieldLogger
+	publisher  Publisher
 }
 
 // go:generate go run github.com/vektra/mockery/v2@v2.20.0 --name=CampaignRepository --case snake
@@ -23,11 +24,18 @@ type CampaignRepository interface {
 	GetScheduledNotifications(day, currentTime string) ([]*ScheduledNotification, error)
 }
 
-func NewCampaignService(db *database.AppDB, repo CampaignRepository, logger log.FieldLogger) *CampaignService {
+// moved to publisher folder
+// go:generate go run github.com/vektra/mockery/v2@v2.20.0 --name=Publisher --case snake
+type Publisher interface {
+	Publish(queueName string, event []byte) error
+}
+
+func NewCampaignService(db *database.AppDB, repo CampaignRepository, logger log.FieldLogger, publisher Publisher) *CampaignService {
 	return &CampaignService{
 		db:         db,
 		repository: repo,
 		logger:     logger,
+		publisher:  publisher,
 	}
 }
 
@@ -61,8 +69,22 @@ func (s *CampaignService) SendScheduledNotifications() error {
 		return err
 	}
 	for _, r := range res {
-		fmt.Println(r)
+		err := s.publishScheduledNotificationEvent(r)
+		if err != nil {
+			s.logger.WithFields(log.Fields{
+				"notification": r,
+			}).Error("failed to publish scheduled notification")
+		}
 	}
 
 	return nil
+}
+
+func (s *CampaignService) publishScheduledNotificationEvent(n *ScheduledNotification) error {
+	event, err := common.NewScheduledNotification(n.CampaignName, n.Message, n.UserUuid, n.DeviceToken)
+	if err != nil {
+		return fmt.Errorf("failed to create zendesk ticket comment event %w", err)
+	}
+
+	return s.publisher.Publish(common.ScheduledNotificationsQueue, event)
 }

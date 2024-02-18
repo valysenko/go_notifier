@@ -4,6 +4,7 @@ import (
 	"context"
 	"go_notifier/configs"
 	"go_notifier/pkg/database"
+	"go_notifier/pkg/transport/rabbitmq"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,12 +12,14 @@ import (
 
 	"github.com/go-co-op/gocron/v2"
 	log "github.com/sirupsen/logrus"
+	"github.com/streadway/amqp"
 )
 
 type NotifierApp struct {
-	cfg    *configs.AppConfig
-	logger log.FieldLogger
-	mysql  *database.AppDB
+	cfg              *configs.AppConfig
+	logger           log.FieldLogger
+	mysql            *database.AppDB
+	rabbitConnection *amqp.Connection
 }
 
 func NewNotifierApp(ctx context.Context, cfg *configs.AppConfig) *NotifierApp {
@@ -29,10 +32,13 @@ func NewNotifierApp(ctx context.Context, cfg *configs.AppConfig) *NotifierApp {
 		panic(err)
 	}
 
+	rabbitApp := rabbitmq.NewRabbitApp(&cfg.RabbitConfig)
+
 	return &NotifierApp{
-		cfg:    appConfig,
-		logger: logger,
-		mysql:  db,
+		cfg:              appConfig,
+		logger:           logger,
+		mysql:            db,
+		rabbitConnection: rabbitApp.Connection,
 	}
 }
 
@@ -79,4 +85,5 @@ func (app *NotifierApp) Run(ctx context.Context) {
 
 func (app *NotifierApp) Close(ctx context.Context) {
 	app.mysql.Mysql.Close()
+	app.rabbitConnection.Close()
 }

@@ -2,6 +2,7 @@ package campaign
 
 import (
 	"errors"
+	mocks "go_notifier/internal/campaign/mocks/publisher"
 	"go_notifier/internal/common"
 	"go_notifier/pkg/database"
 	"strings"
@@ -16,7 +17,7 @@ func TestCreateCampaign(t *testing.T) {
 	log.SetLevel(log.FatalLevel)
 	db, mock := database.InitMockDB(t)
 	defer db.Mysql.Close()
-	s := NewCampaignService(db, NewMysqlCampaignRepository(db), log.New())
+	s := NewCampaignService(db, NewMysqlCampaignRepository(db), log.New(), mocks.NewPublisher(t))
 
 	dto := &common.CampaignRequest{
 		Name:       "MyCampaign",

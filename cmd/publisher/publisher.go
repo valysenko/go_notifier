@@ -15,7 +15,7 @@ func main() {
 	defer rabbitApp.Close()
 	publisher := rabbitmq.NewPublisher(rabbitApp.Connection, log.New())
 
-	event := rabbitmq.OneEvent{TicketID: 1, CommentID: 2}
+	event := common.OneEvent{TicketID: 1, CommentID: 2}
 	body, err := json.Marshal(event)
 	if err != nil {
 	}

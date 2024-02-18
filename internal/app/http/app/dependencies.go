@@ -1,9 +1,9 @@
 package app
 
 import (
+	"go_notifier/internal/app/http/server"
 	"go_notifier/internal/campaign"
 	"go_notifier/internal/device"
-	"go_notifier/internal/http/server"
 	"go_notifier/internal/user"
 	"go_notifier/internal/user_campaign"
 	"os"
@@ -34,7 +34,7 @@ func NewDeviceService(app *ServerApp) *device.DeviceService {
 }
 
 func NewCampaignService(app *ServerApp) *campaign.CampaignService {
-	return campaign.NewCampaignService(app.mysql, NewCampaignRepository(app), app.logger)
+	return campaign.NewCampaignService(app.mysql, NewCampaignRepository(app), app.logger, nil)
 }
 
 func NewUserService(app *ServerApp) *user.UserService {

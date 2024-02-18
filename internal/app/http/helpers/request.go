@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	internal_errors "go_notifier/internal/app/http/errors"
 	"go_notifier/internal/common"
-	internal_errors "go_notifier/internal/http/errors"
 	"io"
 	"net/http"
 )

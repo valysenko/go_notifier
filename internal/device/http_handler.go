@@ -2,8 +2,8 @@ package device
 
 import (
 	"encoding/json"
+	"go_notifier/internal/app/http/helpers"
 	"go_notifier/internal/common"
-	"go_notifier/internal/http/helpers"
 	"net/http"
 )
 

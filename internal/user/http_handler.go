@@ -3,8 +3,8 @@ package user
 import (
 	"encoding/json"
 	"errors"
+	"go_notifier/internal/app/http/helpers"
 	"go_notifier/internal/common"
-	"go_notifier/internal/http/helpers"
 	"net/http"
 
 	"github.com/go-sql-driver/mysql"

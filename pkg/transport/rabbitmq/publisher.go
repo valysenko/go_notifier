@@ -55,13 +55,3 @@ func (p *Publisher) Publish(queueName string, event []byte) error {
 
 	return nil
 }
-
-// example events
-type OneEvent struct {
-	TicketID  int `json:"ticketId"`
-	CommentID int `json:"commentId"`
-}
-
-type TwoEvent struct {
-	AuthorId int `json:"authorId"`
-}

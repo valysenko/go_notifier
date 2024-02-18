@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"go_notifier/configs"
-	"go_notifier/internal/http/app"
+	"go_notifier/internal/app/http/app"
 )
 
 func main() {
