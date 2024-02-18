@@ -12,7 +12,7 @@ import (
 func NewLogger() log.FieldLogger {
 	logger := log.New()
 	logger.SetOutput(os.Stdout)
-	logger.SetFormatter(&log.JSONFormatter{DataKey: "fields"})
+	//logger.SetFormatter(&log.JSONFormatter{DataKey: "fields"})
 	// logger.SetFormatter(&logrus.TextFormatter{
 	// 	ForceColors:   true,
 	// 	FullTimestamp: true,

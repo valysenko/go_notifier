@@ -21,9 +21,9 @@ func main() {
 	}
 	publisher.Publish(common.RabbitFirstQueue, body)
 
-	// event2 := rabbitmq.TwoEvent{AuthorId: 12}
-	// body, err = json.Marshal(event2)
-	// if err != nil {
-	// }
-	// publisher.Publish(common.RabbitSecondQueue, body)
+	event2 := common.TwoEvent{AuthorId: 12}
+	body, err = json.Marshal(event2)
+	if err != nil {
+	}
+	publisher.Publish(common.RabbitSecondQueue, body)
 }

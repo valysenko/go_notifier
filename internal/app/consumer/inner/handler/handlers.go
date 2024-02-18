@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go_notifier/internal/common"
+	"go_notifier/pkg/transport/rabbitmq"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -12,30 +13,32 @@ import (
 type FirstQueueMessageHandler struct {
 }
 
-func (mh *FirstQueueMessageHandler) Handle(ctx context.Context, b []byte) error {
+func (mh *FirstQueueMessageHandler) Handle(ctx context.Context, b []byte) *rabbitmq.HandlerError {
 	fmt.Println("first handler")
 	var event common.OneEvent
 	err := json.Unmarshal(b, &event)
 	if err != nil {
-		return err
+		return rabbitmq.NewSkippableError(err, "error while processing message")
 	}
 
 	fmt.Println(event)
+	return rabbitmq.NewRetriableError(err, "error while processing message")
 	return nil
 }
 
 type SecondQueueMessageHandler struct {
 }
 
-func (mh *SecondQueueMessageHandler) Handle(ctx context.Context, b []byte) error {
+func (mh *SecondQueueMessageHandler) Handle(ctx context.Context, b []byte) *rabbitmq.HandlerError {
 	fmt.Println("second handler")
 	var event common.TwoEvent
 	err := json.Unmarshal(b, &event)
 	if err != nil {
-		return err
+		return rabbitmq.NewSkippableError(err, "error while processing message")
 	}
 
 	fmt.Println(event)
+	return rabbitmq.NewSkippableError(err, "error while processing message")
 	return nil
 }
 
@@ -49,22 +52,18 @@ func NewScheduledNotificationHandler(logger log.FieldLogger) *ScheduledNotificat
 	}
 }
 
-func (snh *ScheduledNotificationHandler) Handle(ctx context.Context, b []byte) error {
+func (snh *ScheduledNotificationHandler) Handle(ctx context.Context, b []byte) *rabbitmq.HandlerError {
 	var event common.ScheduledNotification
 	err := json.Unmarshal(b, &event)
 	if err != nil {
-		return err
+		return rabbitmq.NewSkippableError(err, "error while processing message")
 	}
 
 	snh.logger.WithFields(log.Fields{
 		"event": event,
-	}).Info("ScheduledNotificationHandler - received event")
+	}).Info("ScheduledNotificationHandler - processing event")
 
 	// TODO ...
-
-	snh.logger.WithFields(log.Fields{
-		"event": event,
-	}).Info("ScheduledNotificationHandler - processed event")
 
 	return nil
 }

@@ -2,8 +2,7 @@ package rabbitmq
 
 import (
 	"context"
-	"errors"
-	"go_notifier/internal/common"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
@@ -36,7 +35,7 @@ func (cm ConsumersMap) Close() {
 type MessageHandlersMap map[string][]MessageHandler
 
 type MessageHandler interface {
-	Handle(ctx context.Context, b []byte) error
+	Handle(ctx context.Context, b []byte) *HandlerError
 }
 
 type Consumer struct {
@@ -83,7 +82,15 @@ func (сon *Consumer) Listen(ctx context.Context) error {
 	logFields := log.Fields{"queue": сon.QueueName}
 
 	сon.LogInfo("started consuming messages", logFields)
-	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	msgs, err := ch.Consume(
+		q.Name, // queue
+		"",     // consumer
+		false,  // auto-ack
+		false,  // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
+	)
 	if err != nil {
 		log.Error(err.Error())
 		return err
@@ -104,20 +111,21 @@ func (сon *Consumer) Listen(ctx context.Context) error {
 			logFields["body"] = string(d.Body)
 			сon.LogInfo("received message", logFields)
 
-			var wrapedErr *common.WrappedError
-			err = сon.handler.Handle(ctx, d.Body)
-			if err != nil {
-				if errors.As(err, &wrapedErr) {
-					if wrapedErr.ErrorType == common.ErrNotFound {
-						// don't need to retry - skip message
-						сon.LogError("failed to process message", logFields)
-					}
-				} else {
-					// TODO: retry
-					сon.LogInfo("will be retry", logFields)
+			handlerError := сon.handler.Handle(ctx, d.Body)
+			if handlerError != nil {
+				if handlerError.ErrorType == Skippable {
+					сon.LogError("error while processing message. skipping it", logFields)
+				} else if handlerError.ErrorType == Retriable {
+					// TOTO. run retries
+					сon.LogError("error while processing message. will retry", logFields)
 				}
 			}
-			сon.LogInfo("processed message", logFields)
+
+			if err := d.Ack(false); err != nil {
+				сon.LogInfo(fmt.Sprintf("error acknowledging message : %s", err), logFields)
+			} else {
+				сon.LogInfo("acknowledged message", logFields)
+			}
 		}
 	}
 }
