@@ -8,6 +8,7 @@ import (
 	"go_notifier/pkg/transport/rabbitmq"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
@@ -57,6 +58,9 @@ func (app *ConsumerApp) Run(ctx context.Context) error {
 		app.rabbitConnection.Close()
 		cancel()
 	}()
+
+	numGoroutines := runtime.NumGoroutine()
+	fmt.Println("Started app. Number of goroutines after:", numGoroutines)
 
 	if err := grp.Wait(); err != nil {
 		return fmt.Errorf("ConsumerApp Error: %s", err)

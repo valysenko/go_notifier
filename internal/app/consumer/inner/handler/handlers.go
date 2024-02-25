@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go_notifier/internal/common"
 	"go_notifier/pkg/transport/rabbitmq"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -21,8 +22,13 @@ func (mh *FirstQueueMessageHandler) Handle(ctx context.Context, b []byte) *rabbi
 		return rabbitmq.NewSkippableError(err, "error while processing message")
 	}
 
-	fmt.Println(event)
-	return rabbitmq.NewRetriableError(err, "error while processing message")
+	if event.TicketID == 2 {
+		// time.Sleep(time.Microsecond * 30)
+		return rabbitmq.NewRetriableError(err, "error while processing message")
+	}
+
+	time.Sleep(time.Second * 1)
+	// time.Sleep(time.Microsecond * 30)
 	return nil
 }
 
@@ -37,8 +43,8 @@ func (mh *SecondQueueMessageHandler) Handle(ctx context.Context, b []byte) *rabb
 		return rabbitmq.NewSkippableError(err, "error while processing message")
 	}
 
-	fmt.Println(event)
-	return rabbitmq.NewSkippableError(err, "error while processing message")
+	// fmt.Println(event)
+	// return rabbitmq.NewSkippableError(err, "error while processing message")
 	return nil
 }
 

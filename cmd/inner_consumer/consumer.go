@@ -13,5 +13,8 @@ func main() {
 	cfg := configs.InitConfig()
 	app := app.NewConsumerApp(ctx, cfg)
 	defer app.Close(ctx)
-	app.Run(ctx)
+	err := app.Run(ctx)
+	if err != nil {
+		app.LogError(err)
+	}
 }

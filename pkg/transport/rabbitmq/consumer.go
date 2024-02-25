@@ -3,10 +3,17 @@ package rabbitmq
 import (
 	"context"
 	"fmt"
+	"runtime"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+	"golang.org/x/sync/errgroup"
 )
+
+const maxRetries = 3 // 1 attmpt + 3 retries
+const backoffBase = 1
+const backoffCoefficient = 3
+const numOfWorkers = 10
 
 type ConsumersMap map[string]*Consumer
 
@@ -43,6 +50,7 @@ type Consumer struct {
 	channel   *amqp.Channel
 	handler   MessageHandler
 	logger    log.FieldLogger
+	sleeper   *SecondsSleeper
 	QueueName string
 }
 
@@ -52,6 +60,7 @@ func NewConsumer(conn *amqp.Connection, queueName string, handler MessageHandler
 		QueueName: queueName,
 		handler:   handler,
 		logger:    logger,
+		sleeper:   NewSecondsSleeper(backoffBase, backoffCoefficient),
 	}
 
 	return consumer
@@ -96,38 +105,34 @@ func (сon *Consumer) Listen(ctx context.Context) error {
 		return err
 	}
 
+	sem := make(chan struct{}, numOfWorkers)
+	grp, ctx := errgroup.WithContext(ctx)
+L:
 	for {
 		select {
 		case <-ctx.Done():
 			defer сon.Close()
 			сon.LogInfo("context cancelled", logFields)
-			return nil
+			break L
 		case d, ok := <-msgs:
+			delivery := d
 			if !ok {
 				сon.LogInfo("channel closed", logFields)
-				return nil
+				break L
 			}
-
-			logFields["body"] = string(d.Body)
-			сon.LogInfo("received message", logFields)
-
-			handlerError := сon.handler.Handle(ctx, d.Body)
-			if handlerError != nil {
-				if handlerError.ErrorType == Skippable {
-					сon.LogError("error while processing message. skipping it", logFields)
-				} else if handlerError.ErrorType == Retriable {
-					// TOTO. run retries
-					сon.LogError("error while processing message. will retry", logFields)
-				}
-			}
-
-			if err := d.Ack(false); err != nil {
-				сon.LogInfo(fmt.Sprintf("error acknowledging message : %s", err), logFields)
-			} else {
-				сon.LogInfo("acknowledged message", logFields)
-			}
+			sem <- struct{}{}
+			grp.Go(func() error {
+				defer func() { <-sem }()
+				return сon.processMessage(ctx, &delivery)
+			})
 		}
 	}
+
+	if err := grp.Wait(); err != nil {
+		return fmt.Errorf("consumer error %w", err)
+	}
+
+	return nil
 }
 
 func (c *Consumer) LogInfo(msg string, fields log.Fields) {
@@ -151,5 +156,47 @@ func (c *Consumer) Close() error {
 		}
 	}
 
+	return nil
+}
+
+func (con *Consumer) processMessage(ctx context.Context, d *amqp.Delivery) error {
+	logFields := log.Fields{"queue": con.QueueName}
+	logFields["body"] = string(d.Body)
+	logFields["gorouitnes"] = runtime.NumGoroutine()
+	con.LogInfo("received message", logFields)
+
+	handlerError := con.handler.Handle(ctx, d.Body)
+	if handlerError == nil {
+		return con.ackMessage(d, logFields)
+	}
+
+	if handlerError.ErrorType == Skippable {
+		con.LogError("error while processing message. skipping it", logFields)
+		return nil
+	} else if handlerError.ErrorType == Retriable {
+		con.LogError("error while processing message. will retry", logFields)
+
+		for i := 0; i < maxRetries; i++ {
+			con.LogInfo(fmt.Sprintf("retry attempt=%d", i+1), logFields)
+			err := con.handler.Handle(ctx, d.Body)
+			if err == nil {
+				return con.ackMessage(d, logFields)
+			}
+			con.sleeper.Sleep(i)
+		}
+		con.LogError("failed to retry message. skipping it", logFields)
+
+		return con.ackMessage(d, logFields)
+	}
+
+	return nil
+}
+
+func (con *Consumer) ackMessage(d *amqp.Delivery, logFields log.Fields) error {
+	if err := d.Ack(false); err != nil {
+		return fmt.Errorf("error acknowledging message : %w", err)
+	}
+
+	con.LogInfo("acknowledged message", logFields)
 	return nil
 }
