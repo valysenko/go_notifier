@@ -3,8 +3,8 @@ package app
 import (
 	"go_notifier/internal/app/http/server"
 	"go_notifier/internal/campaign"
-	"go_notifier/internal/device"
 	"go_notifier/internal/user"
+	"go_notifier/internal/user_app"
 	"go_notifier/internal/user_campaign"
 	"os"
 
@@ -29,8 +29,8 @@ func NewCampaignRepository(app *ServerApp) *campaign.MysqlCampaignRepository {
 }
 
 // service
-func NewDeviceService(app *ServerApp) *device.DeviceService {
-	return device.NewDeviceService(app.mysql, NewUserRepository(app))
+func NewUserAppService(app *ServerApp) *user_app.UserAppService {
+	return user_app.NewUserAppService(app.mysql, NewUserRepository(app))
 }
 
 func NewCampaignService(app *ServerApp) *campaign.CampaignService {
@@ -46,8 +46,8 @@ func NewUserCampaignService(app *ServerApp) *user_campaign.UserCampaignService {
 }
 
 // http handler
-func NewDeviceHandler(app *ServerApp) *device.DeviceHandler {
-	return device.NewDeviceHandler(NewDeviceService(app))
+func NewUserAppHandler(app *ServerApp) *user_app.UserAppHandler {
+	return user_app.NewUserAppHandler(NewUserAppService(app))
 }
 
 func NewCampaignHandler(app *ServerApp) *campaign.CampaignHandler {
@@ -64,7 +64,7 @@ func NewUserCampaignHandler(app *ServerApp) *user_campaign.UserCampaignHandler {
 
 // http server
 func NewServer(app *ServerApp) *server.HttpServer {
-	dh := NewDeviceHandler(app)
+	dh := NewUserAppHandler(app)
 	ch := NewCampaignHandler(app)
 	uh := NewUserHandler(app)
 	uch := NewUserCampaignHandler(app)

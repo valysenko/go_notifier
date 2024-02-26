@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/url"
@@ -15,6 +16,7 @@ type AppConfig struct {
 	DBConfig
 	HttpServerConfig
 	RabbitConfig
+	FirebaseConfig
 }
 
 type DBConfig struct {
@@ -57,6 +59,20 @@ func (cfg *DBConfig) ProvideDSN() string {
 		cfg.Port,
 		cfg.DbName,
 	)
+}
+
+type FirebaseConfig struct {
+	Config string `env:"FIREBASE_AUTH_CONFIG"`
+}
+
+func (cfg *FirebaseConfig) GetDecodedFireBaseKey() ([]byte, error) {
+	fireBaseAuthKey := cfg.Config
+	decodedKey, err := base64.StdEncoding.DecodeString(fireBaseAuthKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return decodedKey, nil
 }
 
 func InitConfig() *AppConfig {

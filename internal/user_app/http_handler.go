@@ -1,4 +1,4 @@
-package device
+package user_app
 
 import (
 	"encoding/json"
@@ -7,27 +7,28 @@ import (
 	"net/http"
 )
 
-type DeviceServiceInterface interface {
-	CreateDevice(request *common.DeviceRequest) (int64, error)
+type UserAppServiceInterface interface {
+	CreateUserApp(request *common.UserAppRequest) (int64, error)
 }
 
-type CreateDeviceResponse struct {
-	Token string `json:"token"`
+type CreateUserAppResponse struct {
+	Identifier string `json:"identitier"`
+	Type       string `json:"type"`
 }
 
-type DeviceHandler struct {
-	service DeviceServiceInterface
+type UserAppHandler struct {
+	service UserAppServiceInterface
 }
 
-func NewDeviceHandler(service DeviceServiceInterface) *DeviceHandler {
-	return &DeviceHandler{
+func NewUserAppHandler(service UserAppServiceInterface) *UserAppHandler {
+	return &UserAppHandler{
 		service: service,
 	}
 }
 
-func (h *DeviceHandler) CreateDevice(w http.ResponseWriter, r *http.Request) {
+func (h *UserAppHandler) CreateUserApp(w http.ResponseWriter, r *http.Request) {
 	// request
-	var request common.DeviceRequest
+	var request common.UserAppRequest
 	err := helpers.CreateAndValidateFromRequest(r, &request)
 	if err != nil {
 		helpers.HandleRequestError(err, w)
@@ -35,14 +36,14 @@ func (h *DeviceHandler) CreateDevice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// run business logic
-	_, err = h.service.CreateDevice(&request)
+	_, err = h.service.CreateUserApp(&request)
 	if err != nil {
 		http.Error(w, "error while device creation", http.StatusInternalServerError)
 		return
 	}
 
 	// response
-	responseData := CreateDeviceResponse{Token: request.Token}
+	responseData := CreateUserAppResponse{Identifier: request.Identifier, Type: request.Type}
 	jsonResponse, err := json.Marshal(responseData)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

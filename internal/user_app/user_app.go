@@ -1,4 +1,4 @@
-package device
+package user_app
 
 import (
 	"go_notifier/internal/common"
@@ -10,31 +10,31 @@ type UserRepository interface {
 	GetUserIDByUUID(uuid string) (int64, error)
 }
 
-type DeviceService struct {
+type UserAppService struct {
 	db             *database.AppDB
 	userRepository UserRepository
 }
 
-func NewDeviceService(db *database.AppDB, userRepo UserRepository) *DeviceService {
-	return &DeviceService{
+func NewUserAppService(db *database.AppDB, userRepo UserRepository) *UserAppService {
+	return &UserAppService{
 		db:             db,
 		userRepository: userRepo,
 	}
 }
 
-func (s *DeviceService) CreateDevice(request *common.DeviceRequest) (int64, error) {
+func (s *UserAppService) CreateUserApp(request *common.UserAppRequest) (int64, error) {
 	userId, err := s.userRepository.GetUserIDByUUID(request.UserUUID)
 	if err != nil {
 		return 0, err
 	}
 
-	insertStatement, err := s.db.Mysql.Prepare("INSERT INTO device(token, user_id) VALUES (?, ?)")
+	insertStatement, err := s.db.Mysql.Prepare("INSERT INTO user_app(identifier, type, user_id) VALUES (?, ?, ?)")
 	if err != nil {
 		return 0, err
 	}
 	defer insertStatement.Close()
 
-	res, err := insertStatement.Exec(request.Token, userId)
+	res, err := insertStatement.Exec(request.Identifier, request.Type, userId)
 	if err != nil {
 		return 0, err
 	}
