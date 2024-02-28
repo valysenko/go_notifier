@@ -12,11 +12,12 @@ type CampaignIdTime struct {
 }
 
 type ScheduledNotification struct {
-	CampaignUuid string
-	CampaignName string
-	Message      string
-	UserUuid     string
-	DeviceToken  string
+	CampaignUuid  string
+	CampaignName  string
+	Message       string
+	UserUuid      string
+	AppIdentifier string
+	AppType       string
 }
 
 type MysqlCampaignRepository struct {
@@ -48,11 +49,11 @@ func (repo *MysqlCampaignRepository) GetCampgignIdAndTimeByUUID(uuid string) (*C
 func (repo *MysqlCampaignRepository) GetScheduledNotifications(day, currentTime string) ([]*ScheduledNotification, error) {
 	var notifications []*ScheduledNotification
 
-	query := `SELECT campaign.uuid, campaign.name, campaign.message, u.uuid as user_uuid, d.token
+	query := `SELECT campaign.uuid, campaign.name, campaign.message, u.uuid as user_uuid, uap.identifier, uap.type
 		FROM campaign
 		LEFT JOIN user_campaign ON user_campaign.campaign_id = campaign.id
 		LEFT JOIN user u ON user_campaign.user_id = u.id
-		LEFT JOIN device d ON u.id = d.user_id
+		LEFT JOIN user_app uap ON u.id = uap.user_id
 		WHERE campaign.is_active = true
 	  	AND FIND_IN_SET(?, days_of_week)
 	 	AND user_campaign.time = ?;`
@@ -71,7 +72,7 @@ func (repo *MysqlCampaignRepository) GetScheduledNotifications(day, currentTime 
 
 	for rows.Next() {
 		var notification ScheduledNotification
-		err := rows.Scan(&notification.CampaignUuid, &notification.CampaignName, &notification.Message, &notification.UserUuid, &notification.DeviceToken)
+		err := rows.Scan(&notification.CampaignUuid, &notification.CampaignName, &notification.Message, &notification.UserUuid, &notification.AppIdentifier, &notification.AppType)
 		if err != nil {
 			return nil, err
 		}

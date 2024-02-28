@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"context"
 	"fmt"
+	"go_notifier/internal/common"
 	"runtime"
 
 	log "github.com/sirupsen/logrus"
@@ -75,30 +76,30 @@ func (сon *Consumer) Listen(ctx context.Context) error {
 	сon.channel = ch
 	defer ch.Close()
 
-	q, err := ch.QueueDeclare(
-		сon.QueueName, // name
-		true,          // durable
-		false,         // delete when unused
-		false,         // exclusive
-		false,         // no-wait
-		nil,           // arguments
-	)
-	if err != nil {
-		log.Error(err.Error())
-		return err
-	}
-
 	logFields := log.Fields{"queue": сon.QueueName}
+
+	exchangeType := common.QueueExchangeType[сon.QueueName]
+	if exchangeType == common.DelayedExchangeType {
+		err := сon.declareQueueWithDelayedExchange(ch)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := сon.declareQueueWithDirectExchange(ch)
+		if err != nil {
+			return err
+		}
+	}
 
 	сon.LogInfo("started consuming messages", logFields)
 	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		false,  // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
+		сon.QueueName, // queue
+		"",            // consumer tag
+		false,         // auto-ack
+		false,         // exclusive
+		false,         // no-local
+		false,         // no-wait
+		nil,           // args
 	)
 	if err != nil {
 		log.Error(err.Error())
@@ -198,5 +199,93 @@ func (con *Consumer) ackMessage(d *amqp.Delivery, logFields log.Fields) error {
 	}
 
 	con.LogInfo("acknowledged message", logFields)
+	return nil
+}
+
+func (con *Consumer) declareQueueWithDirectExchange(ch *amqp.Channel) error {
+	err := ch.ExchangeDeclare(
+		con.QueueName,             // Exchange name
+		common.DirectExchangeType, // Exchange type
+		true,                      // Durable
+		false,                     // Auto-deleted
+		false,                     // Internal
+		false,                     // No-wait
+		nil,                       // Arguments
+	)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+
+	q, err := ch.QueueDeclare(
+		con.QueueName, // Queue name
+		true,          // Durable
+		false,         // Delete when unused
+		false,         // Exclusive
+		false,         // No-wait
+		nil,           // Arguments
+	)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+
+	err = ch.QueueBind(
+		q.Name, // Queue name
+		"",     // Routing key (empty for direct exchanges)
+		q.Name, // Exchange name
+		false,  // No-wait
+		nil,    // Arguments
+	)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (con *Consumer) declareQueueWithDelayedExchange(ch *amqp.Channel) error {
+	args := make(amqp.Table)
+	args["x-delayed-type"] = "direct"
+	err := ch.ExchangeDeclare(
+		con.QueueName,              // Exchange name
+		common.DelayedExchangeType, // Exchange type
+		true,                       // Durable
+		false,                      // Auto-deleted
+		false,                      // Internal
+		false,                      // No-wait
+		args,                       // Arguments
+	)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+
+	q, err := ch.QueueDeclare(
+		con.QueueName, // Queue name
+		true,          // Durable
+		false,         // Delete when unused
+		false,         // Exclusive
+		false,         // No-wait
+		nil,           // Arguments
+	)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+
+	err = ch.QueueBind(
+		q.Name, // Queue name
+		"",     // Routing key (empty for direct exchanges)
+		q.Name, // Exchange name
+		false,  // No-wait
+		nil,    // Arguments
+	)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+
 	return nil
 }

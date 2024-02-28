@@ -63,8 +63,10 @@ services:
       - go-notifier-network
   rabbitmq:
     hostname: go-notifier-rabbitmq
-    image: rabbitmq:3.9.7-management-alpine
-    container_name: bodyfit-engine-rabbit-mq
+    build:
+      context: ..
+      dockerfile: deployments/docker/rabbitmq/Dockerfile
+    container_name: go-notifier-rabbitmq
     ports:
       - "5672:5672"
       - "15673:15672"

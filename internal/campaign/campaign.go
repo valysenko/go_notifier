@@ -81,7 +81,7 @@ func (s *CampaignService) SendScheduledNotifications() error {
 }
 
 func (s *CampaignService) publishScheduledNotificationEvent(n *ScheduledNotification) error {
-	event, err := common.NewScheduledNotification(n.CampaignName, n.Message, n.UserUuid, n.DeviceToken)
+	event, err := common.NewScheduledNotification(n.CampaignName, n.Message, n.UserUuid, n.AppIdentifier, n.AppType)
 	if err != nil {
 		return fmt.Errorf("failed to create zendesk ticket comment event %w", err)
 	}
