@@ -20,15 +20,8 @@ type UserHandlerSuite struct {
 }
 
 func (suite *UserHandlerSuite) SetupSuite() {
-	dbC := configs.DBConfig{
-		Host:         "127.0.0.1",
-		Port:         "29306",
-		Username:     "admin",
-		Password:     "go_notifier",
-		DbName:       "go_notifier",
-		MaxOpenConns: 3,
-		MaxIdleConns: 3,
-	}
+	cfg := configs.InitConfig()
+	dbC := cfg.DBConfig
 
 	db = database.InitDB(&dbC)
 	err := db.Mysql.Ping()

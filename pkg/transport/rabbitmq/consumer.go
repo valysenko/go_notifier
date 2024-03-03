@@ -172,9 +172,11 @@ func (con *Consumer) processMessage(ctx context.Context, d *amqp.Delivery) error
 	}
 
 	if handlerError.ErrorType == Skippable {
+		logFields["err"] = handlerError.Error()
 		con.LogError("error while processing message. skipping it", logFields)
-		return nil
+		return con.ackMessage(d, logFields)
 	} else if handlerError.ErrorType == Retriable {
+		logFields["err"] = handlerError.Error()
 		con.LogError("error while processing message. will retry", logFields)
 
 		for i := 0; i < maxRetries; i++ {

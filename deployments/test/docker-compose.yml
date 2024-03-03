@@ -1,0 +1,61 @@
+version: '3.7'
+
+services:
+  go-notifier-test:
+    restart: always
+    tty: true
+    build:
+      context: ../../
+      dockerfile: deployments/test/docker/app/Dockerfile
+    volumes:
+      - ../../:/go/src/
+    image: go-notifier
+    container_name: go-notifier
+    ports:
+      - "8077:8077"
+    env_file:
+      - .env
+    networks:
+      - go-notifier-network-test
+    depends_on:
+      - mysql-test
+      - rabbitmq-test
+
+  mysql-test:
+    image: mysql:8.1.0
+    command: --default-authentication-plugin=mysql_native_password
+    hostname: go-notifier-mysql-test
+    container_name: go-notifier-mysql-test
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: root1
+      MYSQL_DATABASE: go_notifier
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: go_notifier
+    ports:
+      - "3306:3306"
+    volumes:
+      - go-notifier-mysql-test-data:/var/lib/mysql
+    restart: always
+    networks:
+      - go-notifier-network-test
+  rabbitmq-test:
+    hostname: go-notifier-rabbitmq-test
+    build:
+      context: ../../
+      dockerfile: deployments/test/docker/rabbit/Dockerfile
+    container_name: go-notifier-rabbitmq-test
+    ports:
+      - "5672:5672"
+      - "15673:15672"
+    restart: always
+    networks:
+      - go-notifier-network-test
+
+volumes:
+  go-notifier-mysql-test-data: ~
+
+networks:
+  go-notifier-network-test:
+    name: go-notifier-network-test

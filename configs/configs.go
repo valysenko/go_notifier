@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/joho/godotenv"
 )
 
 type AppConfig struct {
@@ -17,6 +16,7 @@ type AppConfig struct {
 	HttpServerConfig
 	RabbitConfig
 	FirebaseConfig
+	TwilioConfig
 }
 
 type DBConfig struct {
@@ -75,10 +75,16 @@ func (cfg *FirebaseConfig) GetDecodedFireBaseKey() ([]byte, error) {
 	return decodedKey, nil
 }
 
+type TwilioConfig struct {
+	AccountSid    string `env:"TWILIO_ACCOUNT_SID"`
+	AuthToken     string `env:"TWILIO_AUTH_TOKEN"`
+	AccountNumber string `env:"TWILIO_ACCOUNT_NUMBER"`
+}
+
 func InitConfig() *AppConfig {
 	cfg := &AppConfig{}
-	godotenv.Load("deployments/.env") // TODO: figure out, if run go run cmd/main.go
-	// godotenv.Load("../deployments/.env") // TODO: figure out, if run go run main.go
+	//godotenv.Load("deployments/.env") // if run go run cmd/main.go
+	//godotenv.Load("../deployments/.env") // if run go run main.go
 
 	if err := cleanenv.ReadEnv(cfg); err != nil {
 		log.Fatalf("Error reading environment variables: %v", err)

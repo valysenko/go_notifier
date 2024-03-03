@@ -1,0 +1,88 @@
+version: '3.7'
+
+services:
+  go-notifier-loc:
+    restart: always
+    tty: true
+    build:
+      context: ../../
+      dockerfile: deployments/loc/docker/app/Dockerfile
+    volumes:
+      - ../../:/go/src/
+    image: go-notifier
+    container_name: go-notifier
+    ports:
+      - "8077:8077"
+    env_file:
+      - .env
+    networks:
+      - go-notifier-network
+    depends_on:
+      - mysql
+      - rabbitmq
+
+  mysql:
+    image: mysql:8.1.0
+    command: --default-authentication-plugin=mysql_native_password
+    hostname: go-notifier-mysql
+    container_name: go-notifier-mysql
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: root1
+      MYSQL_DATABASE: go_notifier
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: go_notifier
+      # MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      # MYSQL_DATABASE: ${DB_NAME}
+      # MYSQL_USER: ${DB_USERNAME}
+      # MYSQL_PASSWORD: ${DB_PASSWORD}
+    expose:
+      - "3306"
+    ports:
+      - "23306:3306"
+    volumes:
+      - go-notifier-mysql-data:/var/lib/mysql
+    restart: always
+    networks:
+      - go-notifier-network
+
+  mysql-test:
+    image: mysql:8.1.0
+    command: --default-authentication-plugin=mysql_native_password
+    hostname: go-notifier-mysql-test
+    container_name: go-notifier-mysql-test
+    env_file:
+      - .env.test
+    environment:
+      MYSQL_ROOT_PASSWORD: root1
+      MYSQL_DATABASE: go_notifier
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: go_notifier
+    ports:
+      - "29306:3306"
+    volumes:
+      - go-notifier-mysql-test-data:/var/lib/mysql
+    restart: always
+    networks:
+      - go-notifier-network
+  rabbitmq:
+    hostname: go-notifier-rabbitmq
+    build:
+      context: ../../
+      dockerfile: deployments/loc/docker/rabbit/Dockerfile
+    container_name: go-notifier-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15673:15672"
+    restart: always
+    networks:
+      - go-notifier-network
+
+volumes:
+  go-notifier-mysql-data: ~
+  go-notifier-mysql-test-data: ~
+
+networks:
+  go-notifier-network:
+    name: go-notifier-network
